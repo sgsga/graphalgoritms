@@ -4,35 +4,34 @@
  */
 package hu.elte.graphalgorithms.core;
 
+import hu.elte.graphalgorithms.core.exceptions.ArcAlreadyExistsException;
+import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc> implements Cloneable, Graph<N, A> {
 
-public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc> implements Cloneable, Graph<N,A> {
-
-    private HashMap<Integer,N> nodeDatas;
-    private HashMap<Integer,A> arcDatas;
+    private HashMap<Integer, N> nodeDatas;
+    private HashMap<Integer, A> arcDatas;
     private Integer nodeSequence;
     private Integer arcSequence;
-    
-    private HashMap<Integer,HashMap<Integer,Integer>> graph;
+    private HashMap<Integer, HashMap<Integer, Integer>> graph;
 
     public DirectedGraph() {
         nodeDatas = new HashMap<>();
-        arcDatas  = new HashMap<>();
+        arcDatas = new HashMap<>();
         nodeSequence = 0;
         arcSequence = 0;
     }
 
-    
     @Override
     public Integer createNode(N nodeData) {
         try {
             int id = nodeSequence++;
             nodeDatas.put(id, nodeData);
-            graph.put(id, new HashMap<Integer,Integer>());
+            graph.put(id, new HashMap<Integer, Integer>());
             return id;
         } catch (Exception e) {
             return null;
@@ -41,7 +40,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public boolean removeNode(Integer id) {
-        if (nodeDatas.containsKey(id)){
+        if (nodeDatas.containsKey(id)) {
             nodeDatas.remove(id);
             return true;
         } else {
@@ -60,8 +59,21 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public Integer createArc(int startNode, int endNode, float cost, A arcData) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Integer createArc(int startNode, int endNode, float cost, A arcData) throws IdAlreadySetException, ArcAlreadyExistsException {
+        try {
+            HashMap<Integer, Integer> outboundArcs = graph.get(startNode);
+            if (!outboundArcs.containsKey(endNode)) {
+                int id = arcSequence++;
+                arcData.initialize(startNode, endNode, cost, id);
+                arcDatas.put(id, arcData);
+                outboundArcs.put(endNode, id);
+                return id;
+            } else {
+                throw new ArcAlreadyExistsException();
+            }
+        } catch (IdAlreadySetException | ArcAlreadyExistsException e) {
+            return null;
+        }
     }
 
     @Override
@@ -73,7 +85,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     public A getArc(Integer id) {
         return arcDatas.get(id);
     }
-        
+
     @Override
     public List<A> getArcs() {
         return new ArrayList<>(arcDatas.values());
@@ -86,12 +98,27 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public List<A> getOutboundArcs(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HashMap<Integer, Integer> outboundArcs = graph.get(id);
+        ArrayList<A> result = new ArrayList<>(outboundArcs.size());
+        if (outboundArcs.size() > 0) {
+            for (Integer arcId : outboundArcs.values()) {
+                result.add(arcDatas.get(arcId));
+            }
+        }
+        return result;
     }
 
     @Override
     public boolean isDirected() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (getArcCount() == 0) {
+            return false;
+        }
+        for (Integer arcId : nodeDatas.keySet()) {
+            if (getPairOfArc(arcId) == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -106,8 +133,11 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public A getPairOfArc(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        A arc = arcDatas.get(id);
+        Integer pairId = graph.get(arc.getToId()).get(arc.getFromId());
+        if (pairId == null) {
+            return null;
+        }
+        return arcDatas.get(pairId);
     }
-
-    
 }

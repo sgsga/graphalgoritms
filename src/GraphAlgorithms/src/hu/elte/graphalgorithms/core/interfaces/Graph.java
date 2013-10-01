@@ -6,6 +6,7 @@ package hu.elte.graphalgorithms.core.interfaces;
 
 import hu.elte.graphalgorithms.core.GeneralGraphArc;
 import hu.elte.graphalgorithms.core.GeneralGraphNode;
+import hu.elte.graphalgorithms.core.exceptions.ArcAlreadyExistsException;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> ex
 
     public List<N> getNodes();
 
-    public Integer createArc(int startNode, int endNode, float cost, A arcData);
+    public Integer createArc(int startNode, int endNode, float cost, A arcData) throws Exception;
 
     public boolean removeArc(Integer id);
     

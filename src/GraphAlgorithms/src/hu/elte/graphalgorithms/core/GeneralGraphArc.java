@@ -37,6 +37,22 @@ public class GeneralGraphArc {
         this.cost = cost;
         setId(id);
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Integer getFromId() {
+        return fromId;
+    }
+
+    public Integer getToId() {
+        return toId;
+    }
+
+    public Float getCost() {
+        return cost;
+    }
     
     
 }
