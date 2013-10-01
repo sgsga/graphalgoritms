@@ -5,14 +5,38 @@
 package hu.elte.graphalgorithms.core;
 
 import hu.elte.graphalgorithms.core.interfaces.Graph;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
-public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc> implements Cloneable, Graph {
+public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc> implements Cloneable, Graph<N,A> {
 
+    private HashMap<Integer,N> nodeDatas;
+    private HashMap<Integer,A> arcDatas;
+    private Integer nodeSequence;
+    private Integer arcSequence;
+    
+    private HashMap<Integer,HashMap<Integer,Integer>> graph;
+
+    public DirectedGraph() {
+        nodeDatas = new HashMap<>();
+        arcDatas  = new HashMap<>();
+        nodeSequence = 0;
+        arcSequence = 0;
+    }
+
+    
     @Override
-    public Integer createNode(GeneralGraphNode nodeData) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Integer createNode(N nodeData) {
+        try {
+            int id = nodeSequence++;
+            nodeDatas.put(id, nodeData);
+            graph.put(id, new HashMap<Integer,Integer>());
+            return id;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -21,17 +45,17 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public GeneralGraphNode getNode(Integer id) {
+    public N getNode(Integer id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<GeneralGraphNode> getNodes() {
+    public List<N> getNodes() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Integer createArc(int startNode, int endNode, float cost, GeneralGraphArc arcData) {
+    public Integer createArc(int startNode, int endNode, float cost, A arcData) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -41,17 +65,17 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public List<GeneralGraphArc> getArcs() {
+    public List<A> getArcs() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<GeneralGraphArc> getInboundArcs(Integer id) {
+    public List<A> getInboundArcs(Integer id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<GeneralGraphArc> getOutboundArcs(Integer id) {
+    public List<A> getOutboundArcs(Integer id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -71,8 +95,9 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public GeneralGraphArc getPairOfArc(Integer id) {
+    public A getPairOfArc(Integer id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
     
 }

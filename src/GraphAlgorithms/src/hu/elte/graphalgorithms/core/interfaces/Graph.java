@@ -12,25 +12,25 @@ import java.util.List;
  *
  * @author nagysan
  */
-public interface Graph extends Cloneable {
+public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> extends Cloneable {
 
-    public Integer createNode(GeneralGraphNode nodeData);
+    public Integer createNode(N nodeData);
 
     public boolean removeNode(Integer id);
 
-    public GeneralGraphNode getNode(Integer id);
+    public N getNode(Integer id);
 
-    public List<GeneralGraphNode> getNodes();
+    public List<N> getNodes();
 
-    public Integer createArc(int startNode, int endNode, float cost, GeneralGraphArc arcData);
+    public Integer createArc(int startNode, int endNode, float cost, A arcData);
 
     public boolean removeArc(Integer id);
 
-    public List<GeneralGraphArc> getArcs();
+    public List<A> getArcs();
 
-    public List<GeneralGraphArc> getInboundArcs(Integer id);
+    public List<A> getInboundArcs(Integer id);
 
-    public List<GeneralGraphArc> getOutboundArcs(Integer id);
+    public List<A> getOutboundArcs(Integer id);
 
     public boolean isDirected();
 
@@ -38,5 +38,5 @@ public interface Graph extends Cloneable {
 
     public Integer getArcCount();
 
-    public GeneralGraphArc getPairOfArc(Integer id);
+    public A getPairOfArc(Integer id);
 }

@@ -4,6 +4,7 @@
  */
 package hu.elte.graphalgorithms.core;
 
+import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
 import hu.elte.graphalgorithms.core.exceptions.KeyAlreadyExistsException;
 import java.util.HashMap;
 
@@ -14,10 +15,17 @@ import java.util.HashMap;
 public class GeneralGraphNode {
 
     private Integer id;
-    private boolean idBlank;
+    private boolean idBlank = true;
     private HashMap<String, OwnedObjectConainer> additionalData;
     
 
+    public void setId(Integer id) throws IdAlreadySetException {
+        if (idBlank) {
+            this.id = id;
+        } else {
+            throw new IdAlreadySetException();
+        }
+    }
     
     public void addData(String key, Object o, Object owner) throws KeyAlreadyExistsException {
         if (additionalData == null) {
