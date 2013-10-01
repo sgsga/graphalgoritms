@@ -25,6 +25,8 @@ public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> ex
     public Integer createArc(int startNode, int endNode, float cost, A arcData);
 
     public boolean removeArc(Integer id);
+    
+    public A getArc(Integer id);
 
     public List<A> getArcs();
 

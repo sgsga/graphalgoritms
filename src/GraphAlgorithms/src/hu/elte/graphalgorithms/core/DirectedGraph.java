@@ -41,17 +41,22 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public boolean removeNode(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (nodeDatas.containsKey(id)){
+            nodeDatas.remove(id);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public N getNode(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return nodeDatas.get(id);
     }
 
     @Override
     public List<N> getNodes() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new ArrayList<>(nodeDatas.values());
     }
 
     @Override
@@ -65,8 +70,13 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
+    public A getArc(Integer id) {
+        return arcDatas.get(id);
+    }
+        
+    @Override
     public List<A> getArcs() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new ArrayList<>(arcDatas.values());
     }
 
     @Override
@@ -86,12 +96,12 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public Integer getNodeCount() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return nodeDatas.size();
     }
 
     @Override
     public Integer getArcCount() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return arcDatas.size();
     }
 
     @Override
