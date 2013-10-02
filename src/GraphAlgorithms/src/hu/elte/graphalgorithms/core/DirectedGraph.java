@@ -30,6 +30,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     public Integer createNode(N nodeData) {
         try {
             int id = nodeSequence++;
+            nodeData.setId(id);
             nodeDatas.put(id, nodeData);
             graph.put(id, new HashMap<Integer, Integer>());
             return id;
@@ -93,7 +94,15 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public List<A> getInboundArcs(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ArrayList<A> result = new ArrayList<>();
+        if (!arcDatas.isEmpty()){
+            for(A arcData : arcDatas.values()){
+                if (arcData.getToId().equals(id)) {
+                    result.add(arcData);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -139,5 +148,14 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
             return null;
         }
         return arcDatas.get(pairId);
+    }
+    
+    @Override
+    public A getArc(Integer from, Integer to) {
+        Integer arcId = graph.get(from).get(to);
+        if (arcId != null) {
+            return arcDatas.get(arcId);
+        }
+        return null;
     }
 }
