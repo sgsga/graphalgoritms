@@ -11,7 +11,8 @@
   </resources>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="GraphAlgorithms.jar" size="30896" download="eager" />
+    <jar href="GraphAlgorithms.jar" size="31008" download="eager" />
+    <jar href="lib/GraphLibrary.jar" size="19872" download="eager" />
   </resources>
 <security>
   <all-permissions/>
