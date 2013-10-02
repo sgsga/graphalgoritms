@@ -56,6 +56,12 @@ public class GeneralGraphNode {
             }
         }
     }
+
+    public Integer getId() {
+        return id;
+    }
+    
+    
 /*                            Inner classes section                           */
     private class OwnedObjectConainer{
         private Object data;

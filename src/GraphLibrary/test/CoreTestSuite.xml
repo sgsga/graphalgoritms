@@ -23,7 +23,7 @@
             <package name="hu.elte.graphalgorithms.core.test"/>
         </packages>
         <classes>
-            <class name="hu.elte.graphalgorithms.core.test.GraphTestCase" />
+            <class name="hu.elte.graphalgorithms.core.test.GraphTest" />
         </classes>
     </test>
 
