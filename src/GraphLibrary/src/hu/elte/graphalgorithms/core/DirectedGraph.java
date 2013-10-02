@@ -8,23 +8,23 @@ import hu.elte.graphalgorithms.core.exceptions.ArcAlreadyExistsException;
 import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 
 public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc> implements Cloneable, Graph<N, A> {
 
-    private HashMap<Integer, N> nodeDatas;
-    private HashMap<Integer, A> arcDatas;
+    private ConcurrentHashMap<Integer, N> nodeDatas;
+    private ConcurrentHashMap<Integer, A> arcDatas;
     private Integer nodeSequence;
     private Integer arcSequence;
-    private HashMap<Integer, HashMap<Integer, Integer>> graph;
+    private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Integer>> graph;
 
     public DirectedGraph() {
-        nodeDatas = new HashMap<>();
-        arcDatas = new HashMap<>();
+        nodeDatas = new ConcurrentHashMap<>();
+        arcDatas = new ConcurrentHashMap<>();
         nodeSequence = 0;
         arcSequence = 0;
-        graph = new HashMap<>();
+        graph = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -32,7 +32,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
         int id = nodeSequence++;
         nodeData.setId(id);
         nodeDatas.put(id, nodeData);
-        graph.put(id, new HashMap<Integer, Integer>());
+        graph.put(id, new ConcurrentHashMap<Integer, Integer>());
         return id;
     }
 
@@ -66,7 +66,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     @Override
     public Integer createArc(int startNode, int endNode, float cost, A arcData) throws IdAlreadySetException, ArcAlreadyExistsException {
         try {
-            HashMap<Integer, Integer> outboundArcs = graph.get(startNode);
+            ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(startNode);
             if (!outboundArcs.containsKey(endNode)) {
                 int id = arcSequence++;
                 arcData.initialize(startNode, endNode, cost, id);
@@ -117,7 +117,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public List<A> getOutboundArcs(Integer id) {
-        HashMap<Integer, Integer> outboundArcs = graph.get(id);
+        ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(id);
         ArrayList<A> result = new ArrayList<>(outboundArcs.size());
         if (outboundArcs.size() > 0) {
             for (Integer arcId : outboundArcs.values()) {

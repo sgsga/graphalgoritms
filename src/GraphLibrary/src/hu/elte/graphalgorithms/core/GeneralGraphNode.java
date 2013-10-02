@@ -22,6 +22,7 @@ public class GeneralGraphNode {
     public void setId(Integer id) throws IdAlreadySetException {
         if (idBlank) {
             this.id = id;
+            idBlank = false;
         } else {
             throw new IdAlreadySetException();
         }
