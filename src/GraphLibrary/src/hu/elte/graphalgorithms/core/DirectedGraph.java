@@ -24,19 +24,16 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
         arcDatas = new HashMap<>();
         nodeSequence = 0;
         arcSequence = 0;
+        graph = new HashMap<>();
     }
 
     @Override
-    public Integer createNode(N nodeData) {
-        try {
+    public Integer createNode(N nodeData) throws IdAlreadySetException {
             int id = nodeSequence++;
             nodeData.setId(id);
             nodeDatas.put(id, nodeData);
             graph.put(id, new HashMap<Integer, Integer>());
             return id;
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     @Override
@@ -131,12 +128,12 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public Integer getNodeCount() {
+    public int getNodeCount() {
         return nodeDatas.size();
     }
 
     @Override
-    public Integer getArcCount() {
+    public int getArcCount() {
         return arcDatas.size();
     }
 

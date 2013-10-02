@@ -1,8 +1,10 @@
 *.class
 
 # Package Files #
-*.jar
 *.war
 *.ear
 /src/GraphLibrary/build/
 /src/GraphLibrary/dist/
+/src/GraphAlgorithms/build/
+/src/GraphAlgorithms/dist/
+org-netbeans-modules-java-j2seproject-copylibstask.jar

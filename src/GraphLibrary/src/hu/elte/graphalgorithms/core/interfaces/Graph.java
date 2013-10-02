@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> extends Cloneable {
 
-    public Integer createNode(N nodeData);
+    public Integer createNode(N nodeData) throws Exception;
 
     public boolean removeNode(Integer id);
 
@@ -37,9 +37,9 @@ public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> ex
 
     public boolean isDirected();
 
-    public Integer getNodeCount();
+    public int getNodeCount();
 
-    public Integer getArcCount();
+    public int getArcCount();
 
     public A getPairOfArc(Integer id);
     
