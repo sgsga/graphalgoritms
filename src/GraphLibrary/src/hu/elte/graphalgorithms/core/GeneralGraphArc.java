@@ -18,7 +18,7 @@ public class GeneralGraphArc {
     private Integer toId;
     private Float cost;
 
-    private void setId(Integer id) throws IdAlreadySetException {
+    private final void setId(Integer id) throws IdAlreadySetException {
         if (idBlank) {
             this.id = id;
             idBlank = false;
@@ -27,32 +27,37 @@ public class GeneralGraphArc {
         }
     }
 
-    public void setCost(Float cost) {
+    public final void setCost(Float cost) {
         this.cost = cost;
     }
 
     
-    public void initialize(Integer fromId, Integer toId, Float cost, Integer id) throws IdAlreadySetException {
+    public final void initialize(Integer fromId, Integer toId, Float cost, Integer id) throws IdAlreadySetException {
         this.fromId = fromId;
         this.toId = toId;
         this.cost = cost;
         setId(id);
     }
 
-    public Integer getId() {
+    public final Integer getId() {
         return id;
     }
 
-    public Integer getFromId() {
+    public final Integer getFromId() {
         return fromId;
     }
 
-    public Integer getToId() {
+    public final Integer getToId() {
         return toId;
     }
 
-    public Float getCost() {
+    public final Float getCost() {
         return cost;
+    }
+
+    @Override
+    public String toString() {
+        return "GeneralGraphArc(" + "id=" + id +")|"+ fromId + " =="+cost+"==> " + toId;
     }
     
     

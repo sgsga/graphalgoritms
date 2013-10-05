@@ -44,4 +44,5 @@ public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> ex
     public A getPairOfArc(Integer id);
     
     public A getArc(Integer from, Integer to);
+    
 }

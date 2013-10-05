@@ -8,6 +8,7 @@ import hu.elte.graphalgorithms.core.exceptions.ArcAlreadyExistsException;
 import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 
@@ -65,7 +66,6 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public Integer createArc(int startNode, int endNode, float cost, A arcData) throws IdAlreadySetException, ArcAlreadyExistsException {
-        try {
             ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(startNode);
             if (!outboundArcs.containsKey(endNode)) {
                 int id = arcSequence++;
@@ -76,9 +76,6 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
             } else {
                 throw new ArcAlreadyExistsException();
             }
-        } catch (IdAlreadySetException | ArcAlreadyExistsException e) {
-            return null;
-        }
     }
 
     @Override
@@ -168,4 +165,6 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
         }
         return null;
     }
+
+    
 }

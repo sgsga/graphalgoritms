@@ -12,14 +12,14 @@ import java.util.HashMap;
  *
  * @author nagysan
  */
-public class GeneralGraphNode {
+public class GeneralGraphNode{
 
     private Integer id;
     private boolean idBlank = true;
     private HashMap<String, OwnedObjectConainer> additionalData;
     
 
-    public void setId(Integer id) throws IdAlreadySetException {
+    public final void setId(Integer id) throws IdAlreadySetException {
         if (idBlank) {
             this.id = id;
             idBlank = false;
@@ -28,7 +28,7 @@ public class GeneralGraphNode {
         }
     }
     
-    public void addData(String key, Object o, Object owner) throws KeyAlreadyExistsException {
+    public final void addData(String key, Object o, Object owner) throws KeyAlreadyExistsException {
         if (additionalData == null) {
             additionalData = new HashMap<>();
         }
@@ -39,7 +39,7 @@ public class GeneralGraphNode {
         }
     }
     
-    public Object getData(String key) {
+    public final Object getData(String key) {
         if (additionalData != null) {
             if (additionalData.containsKey(key)){
                 return additionalData.get(key).data;
@@ -48,7 +48,7 @@ public class GeneralGraphNode {
             }
         } else return null;
     }
-    public void removeData(String key, Object owner) throws SecurityException{
+    public final void removeData(String key, Object owner) throws SecurityException{
         if (additionalData != null) {
             if (additionalData.containsKey(key) && additionalData.get(key).owner == owner){
                 additionalData.remove(key);
@@ -58,13 +58,13 @@ public class GeneralGraphNode {
         }
     }
 
-    public Integer getId() {
+    public final Integer getId() {
         return id;
     }
     
     
 /*                            Inner classes section                           */
-    private class OwnedObjectConainer{
+    private final class OwnedObjectConainer{
         private Object data;
         private Object owner;
 
@@ -83,5 +83,15 @@ public class GeneralGraphNode {
         
         
     }
+
+//    @Override
+//    protected final Object clone() throws CloneNotSupportedException {
+//        GeneralGraphNode g = new GeneralGraphNode();
+//        g.id = id;
+//        g.idBlank = idBlank;
+//        HashMap<String,OwnedObjectConainer> newData = new HashMap<>();
+//        g.additionalData = new 
+//        return g;
+//    }
             
 }

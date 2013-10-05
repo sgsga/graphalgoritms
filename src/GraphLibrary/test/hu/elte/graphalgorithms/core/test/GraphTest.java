@@ -27,11 +27,13 @@ import org.testng.annotations.Test;
  *
  * @author nagysan
  */
+@Test(singleThreaded = true)
 public class GraphTest {
 
     private static final Logger log = Logger.getLogger(TestNG.class.getName());
     private static DirectedGraph<GeneralGraphNode, GeneralGraphArc> graph = new DirectedGraph<>();
     private static ArrayList<GeneralGraphNode> createdNodes = new ArrayList<>();
+    private static ArrayList<GeneralGraphArc> createdArcs = new ArrayList<>();
 
     public GraphTest() {
     }
@@ -60,18 +62,13 @@ public class GraphTest {
 
     @Test(description = "Add nodes and check data",
           dependsOnMethods = {"createGraphTest"})
-    public void createNodesTest() {
+    public void createNodesTest() throws IdAlreadySetException {
         GeneralGraphNode node1 = new GeneralGraphNode();
         GeneralGraphNode node2 = new GeneralGraphNode();
         Integer createdNode1 = null;
         Integer createdNode2 = null;
-        try {
-            createdNode1 = graph.createNode(node1);
-            createdNode2 = graph.createNode(node2);
-        } catch (IdAlreadySetException ex) {
-            Logger.getLogger(GraphTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail("Test failed: " + ex.getMessage());
-        }
+        createdNode1 = graph.createNode(node1);
+        createdNode2 = graph.createNode(node2);
         assertEquals(createdNode1, node1.getId());
         assertEquals(createdNode2, node2.getId());
         createdNodes.add(node1);
@@ -111,24 +108,55 @@ public class GraphTest {
 
     @Test(description = "Create arc",
           dependsOnMethods = {"createNodesTest"})
-    public void createArcTest() {
-        try {
-            GeneralGraphArc arc = new GeneralGraphArc();
-            graph.createArc(createdNodes.get(0).getId(), createdNodes.get(1).getId(), (float) 42.0, arc);
-        } catch (IdAlreadySetException | ArcAlreadyExistsException ex) {
-            Logger.getLogger(GraphTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail("Test failed: " + ex.getMessage());
-        }
-        
+    public void createArcTest() throws IdAlreadySetException, ArcAlreadyExistsException {
+            GeneralGraphArc arc1 = new GeneralGraphArc();
+            GeneralGraphArc arc2 = new GeneralGraphArc();
+            Integer createdArcId1 = graph.createArc(createdNodes.get(0).getId(), createdNodes.get(1).getId(), (float) 42.0, arc1);
+            Integer createdArcId2 = graph.createArc(createdNodes.get(1).getId(), createdNodes.get(0).getId(), (float) -42.0, arc2);
+            createdArcs.add(arc1);
+            createdArcs.add(arc2);
+    }
+    @Test(description = "Create wrong arc",
+          dependsOnMethods = {"createArcTest"}, expectedExceptions = {ArcAlreadyExistsException.class})
+    public void createWrongArcTest() throws IdAlreadySetException, ArcAlreadyExistsException{
+        GeneralGraphArc arc1 = new GeneralGraphArc();
+        Integer createdArcId1 = graph.createArc(createdNodes.get(0).getId(), createdNodes.get(1).getId(), (float) 42.0, arc1);
+    }
+    
+    @Test(description = "Check the two getArc method",
+          dependsOnMethods = {"createArcTest"})
+    public void getArcTest() {
+        assertSame(createdArcs.get(0), graph.getArc(createdArcs.get(0).getId()));
+        assertSame(createdArcs.get(0), graph.getArc(createdArcs.get(0).getFromId(),createdArcs.get(0).getToId()));
+        assertSame(createdArcs.get(1), graph.getArc(createdArcs.get(1).getId()));
+        assertSame(createdArcs.get(1), graph.getArc(createdArcs.get(1).getFromId(),createdArcs.get(1).getToId()));
     }
 
     @Test(description = "Check the two getArc method",
           dependsOnMethods = {"createArcTest"})
-    public void getArcTest() {
-    }
-
-    @Test(description = "Check the two getArc method",
-          dependsOnMethods = {"createNodesTest"})
     public void getArcsTest() {
+        List<GeneralGraphArc> arcs = graph.getArcs();
+        assertTrue(arcs.size()==createdArcs.size());
+        for (int i = 0; i < createdArcs.size(); ++i) {
+            boolean found = false;
+            for (int j = 0; j < arcs.size(); ++j) {
+                if (createdArcs.get(i) == arcs.get(j)) {
+                    found = true;
+                }
+            }
+            assertTrue(found, "A node cannot be found!");
+        }
+    }
+    
+    @Test(description = "Check the getPairOfArc method",
+          dependsOnMethods = {"createArcTest"})
+    public void getPairOfArcTest() {
+        assertSame(createdArcs.get(0), graph.getPairOfArc(createdArcs.get(1).getId()));
+        assertSame(createdArcs.get(1), graph.getPairOfArc(createdArcs.get(0).getId()));
+    }
+    @Test(description = "Check the getInboundArcs method",
+          dependsOnMethods = {"createArcTest","getArcsTest"})
+    public void getInboundArcsTest() {
+        
     }
 }
