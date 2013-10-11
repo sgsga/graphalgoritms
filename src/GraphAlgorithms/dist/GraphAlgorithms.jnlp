@@ -10,9 +10,12 @@
     <jfx:javafx-runtime version="2.2+" href="http://javadl.sun.com/webapps/download/GetFile/javafx-latest/windows-i586/javafx2.jnlp"/>
   </resources>
   <resources>
-    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="GraphAlgorithms.jar" size="22805" download="eager" />
-    <jar href="lib/GraphLibrary.jar" size="35186" download="eager" />
+    <j2se version="1.6+" java-vm-args="-Djavafx.autoproxy.disable=true "  href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="GraphAlgorithms.jar" size="28141" download="eager" />
+    <jar href="lib/GraphLibrary.jar" size="40818" download="eager" />
+    <jar href="lib/gson-2.2.4-javadoc.jar" size="260228" download="eager" />
+    <jar href="lib/gson-2.2.4-sources.jar" size="135452" download="eager" />
+    <jar href="lib/gson-2.2.4.jar" size="207148" download="eager" />
   </resources>
 <security>
   <all-permissions/>

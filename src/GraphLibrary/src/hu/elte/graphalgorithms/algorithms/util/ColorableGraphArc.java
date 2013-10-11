@@ -21,4 +21,9 @@ public class ColorableGraphArc extends GeneralGraphArc {
     public Color getColor() {
         return color;
     }
+    @Override
+    public String toString() {
+        return "ColorableGraphArc(" + "id=" + getId() +",color="+getColor().toString()+")|"+ getFromId() + " == ("+getCost()+") ==> " + getToId();
+    }
+    
 }

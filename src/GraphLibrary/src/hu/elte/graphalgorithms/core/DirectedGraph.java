@@ -14,11 +14,11 @@ import java.util.List;
 
 public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc> implements Cloneable, Graph<N, A> {
 
-    private ConcurrentHashMap<Integer, N> nodeDatas;
-    private ConcurrentHashMap<Integer, A> arcDatas;
-    private Integer nodeSequence;
-    private Integer arcSequence;
-    private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Integer>> graph;
+    protected ConcurrentHashMap<Integer, N> nodeDatas;
+    protected ConcurrentHashMap<Integer, A> arcDatas;
+    protected Integer nodeSequence;
+    protected Integer arcSequence;
+    protected ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Integer>> graph;
 
     public DirectedGraph() {
         nodeDatas = new ConcurrentHashMap<>();
@@ -29,7 +29,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public Integer createNode(N nodeData) throws IdAlreadySetException {
+    public final Integer createNode(N nodeData) throws IdAlreadySetException {
         int id = nodeSequence++;
         nodeData.setId(id);
         nodeDatas.put(id, nodeData);
@@ -38,7 +38,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public boolean removeNode(Integer id) {
+    public final boolean removeNode(Integer id) {
         if (nodeDatas.containsKey(id)) {
             List<A> inboundArcs = getInboundArcs(id);
             if (inboundArcs.size() > 0) {
@@ -55,17 +55,17 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public N getNode(Integer id) {
+    public final N getNode(Integer id) {
         return nodeDatas.get(id);
     }
 
     @Override
-    public List<N> getNodes() {
+    public final List<N> getNodes() {
         return new ArrayList<>(nodeDatas.values());
     }
 
     @Override
-    public Integer createArc(int startNode, int endNode, float cost, A arcData) throws IdAlreadySetException, ArcAlreadyExistsException {
+    public final Integer createArc(int startNode, int endNode, float cost, A arcData) throws IdAlreadySetException, ArcAlreadyExistsException {
             ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(startNode);
             if (!outboundArcs.containsKey(endNode)) {
                 int id = arcSequence++;
@@ -79,7 +79,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public boolean removeArc(Integer id) {
+    public final boolean removeArc(Integer id) {
         A arc = getArc(id);
         if (arc != null) {
             graph.get(arc.getFromId()).remove(arc.getToId());
@@ -90,17 +90,17 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public A getArc(Integer id) {
+    public final A getArc(Integer id) {
         return arcDatas.get(id);
     }
 
     @Override
-    public List<A> getArcs() {
+    public final List<A> getArcs() {
         return new ArrayList<>(arcDatas.values());
     }
 
     @Override
-    public List<A> getInboundArcs(Integer id) {
+    public final List<A> getInboundArcs(Integer id) {
         ArrayList<A> result = new ArrayList<>();
         if (!arcDatas.isEmpty()) {
             for (A arcData : arcDatas.values()) {
@@ -113,7 +113,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public List<A> getOutboundArcs(Integer id) {
+    public final List<A> getOutboundArcs(Integer id) {
         ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(id);
         ArrayList<A> result = new ArrayList<>(outboundArcs.size());
         if (outboundArcs.size() > 0) {
@@ -125,12 +125,12 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public boolean isDirected() {
+    public final boolean isDirected() {
         if (getArcCount() == 0) {
             return false;
         }
-        for (Integer arcId : nodeDatas.keySet()) {
-            if (getPairOfArc(arcId) == null) {
+        for (Integer arcId : arcDatas.keySet()) {
+            if (getPairOfArc(arcId) == null || !getArc(arcId).getCost().equals(getPairOfArc(arcId).getCost())) {
                 return true;
             }
         }
@@ -138,17 +138,17 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public int getNodeCount() {
+    public final int getNodeCount() {
         return nodeDatas.size();
     }
 
     @Override
-    public int getArcCount() {
+    public final int getArcCount() {
         return arcDatas.size();
     }
 
     @Override
-    public A getPairOfArc(Integer id) {
+    public final A getPairOfArc(Integer id) {
         A arc = arcDatas.get(id);
         Integer pairId = graph.get(arc.getToId()).get(arc.getFromId());
         if (pairId == null) {
@@ -158,7 +158,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public A getArc(Integer from, Integer to) {
+    public final A getArc(Integer from, Integer to) {
         Integer arcId = graph.get(from).get(to);
         if (arcId != null) {
             return arcDatas.get(arcId);
@@ -166,5 +166,4 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
         return null;
     }
 
-    
 }

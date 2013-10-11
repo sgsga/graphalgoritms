@@ -4,10 +4,12 @@
  */
 package hu.elte.graphalgorithms.algorithms.implementations;
 
+import com.google.gson.Gson;
 import hu.elte.graphalgorithms.core.exceptions.UndirectedGraphRequiredException;
 import hu.elte.graphalgorithms.algorithms.interfaces.GraphAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
+import hu.elte.graphalgorithms.core.ExtendedDirectedGraph;
 import hu.elte.graphalgorithms.core.GeneralGraphArc;
 import hu.elte.graphalgorithms.core.GeneralGraphArcLessCostComparator;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
@@ -41,16 +43,19 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
     }
 
     @Override
-    public void run() {
+    public String run() {
         PriorityQueue<ColorableGraphArc> sortedArcs;
-        sortedArcs = new PriorityQueue<>(0,new GeneralGraphArcLessCostComparator<>(0.00001f));
+        sortedArcs = new PriorityQueue<>(1,new GeneralGraphArcLessCostComparator<>(0.00001f));
         sortedArcs.addAll(graph.getArcs());
         while (!sortedArcs.isEmpty()){
             ColorableGraphArc currentArc = sortedArcs.poll();
+            if (currentArc.getFromId()>currentArc.getToId()) continue;
+            if (currentArc.getColor() != ColorableGraphArc.Color.WHITE) continue;
+            
             if (!nodeSets.get(currentArc.getFromId()).equals(nodeSets.get(currentArc.getToId()))) {
                 for(Integer nodeId : nodeSets.keySet()){
                     if (nodeSets.get(nodeId).equals(nodeSets.get(currentArc.getToId()))){
-                        nodeSets.put(nodeId, currentArc.getFromId());
+                        nodeSets.put(nodeId, nodeSets.get(currentArc.getFromId()));
                     }
                 }
                 currentArc.setColor(ColorableGraphArc.Color.BLUE);
@@ -60,27 +65,28 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
                 graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.RED);
             }
         }
+        return null;
+    }
+
+    @Override
+    public String run(ColorableGraphNode s) {
+        return run();
+    }
+
+    @Override
+    public String start() {
+        return doStep();
+    }
+
+    @Override
+    public String start(ColorableGraphNode s) {
+        return start();
+    }
+
+    @Override
+    public String doStep() {
+        return null;
         
-    }
-
-    @Override
-    public void run(ColorableGraphNode s) {
-        run();
-    }
-
-    @Override
-    public void start() {
-        doStep();
-    }
-
-    @Override
-    public void start(ColorableGraphNode s) {
-        start();
-    }
-
-    @Override
-    public boolean doStep() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

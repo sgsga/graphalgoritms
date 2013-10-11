@@ -57,7 +57,7 @@ public class GeneralGraphArc {
 
     @Override
     public String toString() {
-        return "GeneralGraphArc(" + "id=" + id +")|"+ fromId + " =="+cost+"==> " + toId;
+        return "GeneralGraphArc(" + "id=" + id +")|"+ fromId + " == ("+cost+") ==> " + toId;
     }
     
     

@@ -4,6 +4,7 @@
  */
 package hu.elte.graphalgorithms.core;
 
+import com.google.gson.Gson;
 import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
 import hu.elte.graphalgorithms.core.exceptions.KeyAlreadyExistsException;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ public class GeneralGraphNode{
 
     private Integer id;
     private boolean idBlank = true;
-    private HashMap<String, OwnedObjectConainer> additionalData;
+    private HashMap<String, OwnedObjectContainer> additionalData;
     
 
     public final void setId(Integer id) throws IdAlreadySetException {
@@ -33,7 +34,7 @@ public class GeneralGraphNode{
             additionalData = new HashMap<>();
         }
         if (!additionalData.containsKey(key)){
-            additionalData.put(key, new OwnedObjectConainer(o, owner));
+            additionalData.put(key, new OwnedObjectContainer(o, owner));
         } else {
             throw new KeyAlreadyExistsException();
         }
@@ -62,9 +63,13 @@ public class GeneralGraphNode{
         return id;
     }
     
+    public final String toJSON(){
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
     
 /*                            Inner classes section                           */
-    private final class OwnedObjectConainer{
+    private final class OwnedObjectContainer{
         private Object data;
         private Object owner;
 
@@ -76,7 +81,7 @@ public class GeneralGraphNode{
             return owner;
         }
 
-        public OwnedObjectConainer(Object data, Object owner) {
+        public OwnedObjectContainer(Object data, Object owner) {
             this.data = data;
             this.owner = owner;
         }
@@ -89,7 +94,7 @@ public class GeneralGraphNode{
 //        GeneralGraphNode g = new GeneralGraphNode();
 //        g.id = id;
 //        g.idBlank = idBlank;
-//        HashMap<String,OwnedObjectConainer> newData = new HashMap<>();
+//        HashMap<String,OwnedObjectContainer> newData = new HashMap<>();
 //        g.additionalData = new 
 //        return g;
 //    }

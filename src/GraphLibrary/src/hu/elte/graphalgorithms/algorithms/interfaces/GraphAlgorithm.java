@@ -14,9 +14,9 @@ import hu.elte.graphalgorithms.core.interfaces.Graph;
  */
 public interface GraphAlgorithm<N extends GeneralGraphNode, A extends GeneralGraphArc> {
     public void initialize(Graph<N,A> g) throws Exception;
-    public void run() throws Exception;
-    public void run(N s)  throws Exception;
-    public void start()  throws Exception;
-    public void start(N s) throws Exception;
-    public boolean doStep() throws Exception;
+    public String run() throws Exception;
+    public String run(N s)  throws Exception;
+    public String start()  throws Exception;
+    public String start(N s) throws Exception;
+    public String doStep() throws Exception;
 }
