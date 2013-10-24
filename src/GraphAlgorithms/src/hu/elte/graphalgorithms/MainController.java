@@ -8,7 +8,13 @@ import hu.elte.graphalgorithms.algorithms.implementations.KruskalAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
 import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.BLACK;
+import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.BLUE;
+import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.GRAY;
+import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.GREEN;
 import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.PURPLE;
+import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.RED;
+import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.WHITE;
+import static hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode.Color.YELLOW;
 import hu.elte.graphalgorithms.core.ExtendedDirectedGraph;
 import hu.elte.graphalgorithms.core.exceptions.UndirectedGraphRequiredException;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
@@ -50,14 +56,23 @@ public class MainController implements Initializable {
     protected static final String LABEL_KEY = "Label";
     
     private void changeSelectedNode(Circle c) {
-        System.out.println("Current node: " + c.getProperties().get(NODE_ID_KEY));
-        if (selectedNode != null) {
-            selectedNode.setStrokeWidth(3);
-            selectedNode.setStroke(Color.GRAY);
+//        System.out.println("Current node: " + c.getProperties().get(NODE_ID_KEY));
+//        if (selectedNode != null) {
+//            selectedNode.setStrokeWidth(3);
+//            selectedNode.setStroke(getNodeColor(graph.getNode((Integer)selectedNode.getProperties().get(NODE_ID_KEY)).getColor()));
+//        }
+//        selectedNode = c;
+//        selectedNode.setStrokeWidth(3);
+//        selectedNode.setStroke(Color.RED);
+    }
+
+    protected void setSelectedNode(Circle c) {
+        if (c != null){
+            System.out.println("Current node: " + c.getProperties().get(NODE_ID_KEY));
+            btClearSelectedNode.setDisable(false);
         }
         selectedNode = c;
-        selectedNode.setStrokeWidth(3);
-        selectedNode.setStroke(Color.RED);
+        refreshGraphView();
     }
 
     private enum Mode {
@@ -67,6 +82,7 @@ public class MainController implements Initializable {
     protected Graph<ColorableGraphNode, ColorableGraphArc> graph = new ExtendedDirectedGraph<>();
     private Mode currentMode;
     private Circle selectedNode = null;
+    private Circle selectedNodeInArcMode = null;
     private ArrayList<Circle> circles = new ArrayList<>();
     @FXML
     private AnchorPane ap;
@@ -80,6 +96,8 @@ public class MainController implements Initializable {
     private ToggleGroup modeGroup;
     @FXML
     private Button btRun;
+    @FXML
+    private Button btClearSelectedNode;
     private Circle arcTo;
 
     @Override
@@ -115,7 +133,7 @@ public class MainController implements Initializable {
             ap.getChildren().add(c);
             circles.add(c);
             System.out.println(selectedNode);
-            changeSelectedNode(c);
+            
             c.getProperties().put(NODE_ID_KEY, id);
             System.out.println(c.getProperties().get(NODE_ID_KEY));
             c.setCenterX(e.getX());
@@ -123,7 +141,8 @@ public class MainController implements Initializable {
             Text label = new Text(id.toString());
             c.getProperties().put(LABEL_KEY, label);
             ap.getChildren().add(label);
-            label.setFill(Color.RED);
+            c.setFill(getNodeColor(graph.getNode(id).getColor()));
+            label.setFill(getNodeTextColor(graph.getNode(id).getColor()));
             label.setFont(Font.font("Times New Roman", FontWeight.BOLD, 14));
             label.setTextAlignment(TextAlignment.CENTER);
             label.setX(e.getX()-label.getLayoutBounds().getWidth()/2);
@@ -142,7 +161,7 @@ public class MainController implements Initializable {
                 public void handle(MouseEvent t) {
                     Circle circle = (Circle) t.getSource();
                     if (currentMode.equals(Mode.NODE)) {
-                        changeSelectedNode(circle);
+                        setSelectedNode(circle);
                     } else if (currentMode.equals(Mode.DELETE)) {
                         Integer nodeId = (Integer) circle.getProperties().get(NODE_ID_KEY);
                         graph.removeNode(nodeId);
@@ -153,14 +172,14 @@ public class MainController implements Initializable {
                         ap.getChildren().remove(label);
                         System.out.println("Current node count: " + graph.getNodeCount());
                     } else if (currentMode.equals(Mode.ARC)) {
-                        if (selectedNode == null) {
-                            selectedNode = circle;
+                        if (selectedNodeInArcMode == null) {
+                            selectedNodeInArcMode = circle;
                         } else {
                             try {
                                 arcTo = (Circle) t.getSource();
-                                Integer u = (Integer) selectedNode.getProperties().get(NODE_ID_KEY);
+                                Integer u = (Integer) selectedNodeInArcMode.getProperties().get(NODE_ID_KEY);
                                 Integer v = (Integer) arcTo.getProperties().get(NODE_ID_KEY);
-                                System.out.println(selectedNode.getProperties().get(NODE_ID_KEY) + "-->" + arcTo.getProperties().get(NODE_ID_KEY));
+                                System.out.println(selectedNodeInArcMode.getProperties().get(NODE_ID_KEY) + "-->" + arcTo.getProperties().get(NODE_ID_KEY));
                                 if (graph.getArc(u, v) != null) {
                                     MessageBox.show(null, "Többszörös él nem megengedett!", "Hiba", MessageBox.OK);
                                 } else {
@@ -171,8 +190,8 @@ public class MainController implements Initializable {
                                         double dx;
                                         if (u<v){ dx = 10; }
                                         else {dx = -10;}
-                                        l.setStartX(selectedNode.getCenterX()+dx);
-                                        l.setStartY(selectedNode.getCenterY());
+                                        l.setStartX(selectedNodeInArcMode.getCenterX()+dx);
+                                        l.setStartY(selectedNodeInArcMode.getCenterY());
                                         l.setEndX(arcTo.getCenterX()+dx);
                                         l.setEndY(arcTo.getCenterY());
                                         l.toBack();
@@ -181,7 +200,7 @@ public class MainController implements Initializable {
                                     }
                                 }
 
-                                selectedNode = null;
+                                selectedNodeInArcMode = null;
                             } catch (Exception ex) {
                                 Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -206,6 +225,7 @@ public class MainController implements Initializable {
                 }
             });
             System.out.println("Current node count: " + graph.getNodeCount());
+            //setSelectedNode(c);
         }
     }
 
@@ -249,9 +269,7 @@ public class MainController implements Initializable {
     protected void clearGraph() {
         if (MessageBox.show(null, "Biztosan törli a gráfot?", "Megerősítés kérése", MessageBox.YES | MessageBox.NO) == MessageBox.YES) {
             graph.clear();
-            for (Circle c : circles) {
-                ap.getChildren().clear();
-            }
+            ap.getChildren().clear();
             circles.clear();
         }
     }
@@ -262,13 +280,10 @@ public class MainController implements Initializable {
             System.exit(0);
         }
     }
-
-    private void refreshGraphView() {
-        for (Circle c : circles) {
-            Integer id = (Integer) c.getProperties().get(NODE_ID_KEY);
-            ColorableGraphNode node = graph.getNode(id);
+    
+    private Color getNodeColor(ColorableGraphNode.Color nodeColor){
             Color color = null;
-            switch (node.getColor()) {
+            switch (nodeColor) {
                 case WHITE:
                     color = Color.WHITE;
                     break;
@@ -294,7 +309,57 @@ public class MainController implements Initializable {
                     color = Color.YELLOW;
                     break;
             }
+            return color;
+    }
+    
+    private Color getNodeTextColor(ColorableGraphNode.Color nodeColor){
+            Color textColor = Color.RED;
+            switch (nodeColor) {
+                case WHITE:
+                    textColor = Color.BLACK;
+                    break;
+                case BLACK:
+                    textColor = Color.WHITE;
+                    break;
+                case BLUE:
+                    break;
+                case GRAY:
+                    textColor = Color.DEEPSKYBLUE;
+                    break;
+                case GREEN:
+                    break;
+                case PURPLE:
+                    break;
+                case RED:
+                    textColor = Color.YELLOW;
+                    break;
+                case YELLOW:
+                    textColor = Color.RED;
+                    break;
+                default:
+                    textColor = Color.RED;
+                    break;
+            }
+            return textColor;
+    }
+
+    private void refreshGraphView() {
+        for (Circle c : circles) {
+            Integer id = (Integer) c.getProperties().get(NODE_ID_KEY);
+            ColorableGraphNode node = graph.getNode(id);
+            Color color = getNodeColor(node.getColor());
+            Color textColor = getNodeTextColor(node.getColor());
+            
             c.setFill(color);
+            Text label = (Text) c.getProperties().get(LABEL_KEY);
+            label.setFill(textColor);
+            if (c == selectedNode){
+                selectedNode.setStrokeWidth(3);
+                selectedNode.setStroke(Color.RED);
+            } else {
+                c.setStrokeWidth(3);
+                c.setStroke(getNodeColor(graph.getNode((Integer)c.getProperties().get(NODE_ID_KEY)).getColor()));
+            }
             //Tooltip.install(c, new Tooltip(c.getProperties().get(NODE_ID_KEY).toString()));
         }
         
@@ -311,5 +376,11 @@ public class MainController implements Initializable {
 
         }
         refreshGraphView();
+    }
+    
+    @FXML
+    public void clearSelectedNode(){
+        setSelectedNode(null);
+        btClearSelectedNode.setDisable(true);
     }
 }

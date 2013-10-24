@@ -48,6 +48,7 @@
                             <RadioButton fx:id="arcModeRb" layoutX="14.0" layoutY="39.0" mnemonicParsing="false" onAction="#modeChanged" text="Él elhelyezés" textFill="WHITE" toggleGroup="$modeGroup" />
                             <RadioButton fx:id="deleteModeRb" layoutX="14.0" layoutY="62.0" mnemonicParsing="false" onAction="#modeChanged" text="Törlés" textFill="WHITE" toggleGroup="$modeGroup" />
                             <Button layoutX="13.0" layoutY="237.0" mnemonicParsing="false" onAction="#clearGraph" prefWidth="171.0" text="Gráf törlése..." />
+                            <Button fx:id="btClearSelectedNode" disable="true" layoutX="15.0" layoutY="203.0" mnemonicParsing="false" onAction="#clearSelectedNode" prefWidth="171.0" text="Csúcskijelölés törlése..." />
                           </children>
                         </AnchorPane>
                         <AnchorPane maxHeight="200.0" minHeight="200.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
