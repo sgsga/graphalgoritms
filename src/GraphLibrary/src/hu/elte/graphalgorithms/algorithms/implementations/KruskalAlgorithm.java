@@ -4,39 +4,34 @@
  */
 package hu.elte.graphalgorithms.algorithms.implementations;
 
-import com.google.gson.Gson;
 import hu.elte.graphalgorithms.core.exceptions.UndirectedGraphRequiredException;
 import hu.elte.graphalgorithms.algorithms.interfaces.GraphAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
-import hu.elte.graphalgorithms.core.ExtendedDirectedGraph;
-import hu.elte.graphalgorithms.core.GeneralGraphArc;
 import hu.elte.graphalgorithms.core.GeneralGraphArcLessCostComparator;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
 
 /**
  *
  * @author nagysan
  */
-public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, ColorableGraphArc>{
-    
+public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, ColorableGraphArc> {
+
     private Graph<ColorableGraphNode, ColorableGraphArc> graph;
     private HashMap<Integer, Integer> nodeSets = new HashMap<>();
+    private PriorityQueue<ColorableGraphArc> sortedArcs = new PriorityQueue<>();
 
     @Override
-    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g) throws UndirectedGraphRequiredException{
-        if (g.isDirected()){
+    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g) throws UndirectedGraphRequiredException {
+        if (g.isDirected()) {
             throw new UndirectedGraphRequiredException();
         }
         graph = g;
         nodeSets.clear();
-        if (g.getNodeCount()>0){
-            for(ColorableGraphNode node : g.getNodes()){
+        if (g.getNodeCount() > 0) {
+            for (ColorableGraphNode node : g.getNodes()) {
                 nodeSets.put(node.getId(), node.getId());
             }
         }
@@ -44,22 +39,26 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
 
     @Override
     public String run() {
-        PriorityQueue<ColorableGraphArc> sortedArcs;
-        sortedArcs = new PriorityQueue<>(1,new GeneralGraphArcLessCostComparator<>(0.00001f));
-        sortedArcs.addAll(graph.getArcs());
-        while (!sortedArcs.isEmpty()){
+        start();
+        while (!sortedArcs.isEmpty()) {
             ColorableGraphArc currentArc = sortedArcs.poll();
-            if (currentArc.getFromId()>currentArc.getToId()) continue;
-            if (currentArc.getColor() != ColorableGraphArc.Color.WHITE) continue;
-            
+            if (currentArc.getFromId() > currentArc.getToId()) {
+                continue;
+            }
+            if (currentArc.getColor() != ColorableGraphArc.Color.WHITE) {
+                continue;
+            }
+
             if (!nodeSets.get(currentArc.getFromId()).equals(nodeSets.get(currentArc.getToId()))) {
-                for(Integer nodeId : nodeSets.keySet()){
-                    if (nodeSets.get(nodeId).equals(nodeSets.get(currentArc.getToId()))){
+                for (Integer nodeId : nodeSets.keySet()) {
+                    if (nodeSets.get(nodeId).equals(nodeSets.get(currentArc.getToId()))) {
                         nodeSets.put(nodeId, nodeSets.get(currentArc.getFromId()));
                     }
                 }
                 currentArc.setColor(ColorableGraphArc.Color.BLUE);
                 graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.BLUE);
+                graph.getNode(currentArc.getFromId()).setColor(ColorableGraphNode.Color.GREEN);
+                graph.getNode(currentArc.getToId()).setColor(ColorableGraphNode.Color.GREEN);
             } else {
                 currentArc.setColor(ColorableGraphArc.Color.RED);
                 graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.RED);
@@ -75,7 +74,10 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
 
     @Override
     public String start() {
-        return doStep();
+        sortedArcs.clear();
+        sortedArcs = new PriorityQueue<>(1, new GeneralGraphArcLessCostComparator<>(0.00001f));
+        sortedArcs.addAll(graph.getArcs());
+        return "";
     }
 
     @Override
@@ -85,8 +87,31 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
 
     @Override
     public String doStep() {
-        return null;
-        
+        if (!sortedArcs.isEmpty()) {
+            ColorableGraphArc currentArc = sortedArcs.poll();
+            while (currentArc.getFromId() > currentArc.getToId() || currentArc.getColor() != ColorableGraphArc.Color.WHITE) {
+                currentArc = sortedArcs.poll();
+            }
+
+            if (!nodeSets.get(currentArc.getFromId()).equals(nodeSets.get(currentArc.getToId()))) {
+                for (Integer nodeId : nodeSets.keySet()) {
+                    if (nodeSets.get(nodeId).equals(nodeSets.get(currentArc.getToId()))) {
+                        nodeSets.put(nodeId, nodeSets.get(currentArc.getFromId()));
+                    }
+                }
+                currentArc.setColor(ColorableGraphArc.Color.BLUE);
+                graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.BLUE);
+                graph.getNode(currentArc.getFromId()).setColor(ColorableGraphNode.Color.GREEN);
+                graph.getNode(currentArc.getToId()).setColor(ColorableGraphNode.Color.GREEN);
+            } else {
+                currentArc.setColor(ColorableGraphArc.Color.RED);
+                graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.RED);
+            }
+
+            return "";
+        } else {
+            return null;
+        }
+
     }
-    
 }

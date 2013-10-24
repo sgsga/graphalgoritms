@@ -166,4 +166,13 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
         return null;
     }
 
+    @Override
+    public void clear() {
+        arcDatas.clear();
+        nodeDatas.clear();
+        graph.clear();
+        arcSequence = 1;
+        nodeSequence = 1;
+    }
+
 }

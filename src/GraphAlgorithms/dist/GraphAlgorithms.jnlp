@@ -11,11 +11,12 @@
   </resources>
   <resources>
     <j2se version="1.6+" java-vm-args="-Djavafx.autoproxy.disable=true "  href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="GraphAlgorithms.jar" size="28141" download="eager" />
-    <jar href="lib/GraphLibrary.jar" size="40818" download="eager" />
-    <jar href="lib/gson-2.2.4-javadoc.jar" size="260228" download="eager" />
-    <jar href="lib/gson-2.2.4-sources.jar" size="135452" download="eager" />
-    <jar href="lib/gson-2.2.4.jar" size="207148" download="eager" />
+    <jar href="GraphAlgorithms.jar" size="36859" download="eager" />
+    <jar href="lib/GraphLibrary.jar" size="41840" download="eager" />
+    <jar href="lib/gson-2.2.4-javadoc.jar" size="260227" download="eager" />
+    <jar href="lib/gson-2.2.4-sources.jar" size="135450" download="eager" />
+    <jar href="lib/gson-2.2.4.jar" size="207147" download="eager" />
+    <jar href="lib/jfxmessagebox-1.1.0.jar" size="37644" download="eager" />
   </resources>
 <security>
   <all-permissions/>

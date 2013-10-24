@@ -45,6 +45,8 @@ public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> ex
     
     public A getArc(Integer from, Integer to);
     
+    public void clear();
+    
     public interface NodeArcFactory<N,A> {
         public N createNode();
         public A createArc();

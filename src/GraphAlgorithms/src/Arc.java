@@ -34,6 +34,12 @@ public class Arc extends Application {
     graph.createArc(4, 3, 17.0f, new ColorableGraphArc());
     graph.createArc(6, 7, 17.0f, new ColorableGraphArc());
     graph.createArc(7, 6, 17.0f, new ColorableGraphArc());
+    
+    graph.createArc(5, 7, 17.0f, new ColorableGraphArc());
+    graph.createArc(7, 5, 17.0f, new ColorableGraphArc());
+    graph.createArc(5, 6, 17.0f, new ColorableGraphArc());
+    graph.createArc(6, 5, 17.0f, new ColorableGraphArc());
+    
     for(ColorableGraphArc ga : graph.getArcs()){
         System.out.println(ga);
     }
@@ -43,6 +49,9 @@ public class Arc extends Application {
     KruskalAlgorithm ka = new KruskalAlgorithm();
     ka.initialize(graph);
     System.out.println(ka.run());
+        for(ColorableGraphArc ga : graph.getArcs()){
+        System.out.println(ga);
+    }
     Group root = new Group();
     Scene scene = new Scene(root, 260, 80);
     stage.setScene(scene);
