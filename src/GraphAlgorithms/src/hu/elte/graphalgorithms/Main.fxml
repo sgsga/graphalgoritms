@@ -18,7 +18,7 @@
               <content>
                 <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                   <children>
-                    <ListView prefHeight="180.0" prefWidth="1248.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                    <ListView fx:id="lvLog" prefHeight="180.0" prefWidth="1248.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                   </children>
                 </AnchorPane>
               </content>
@@ -32,7 +32,7 @@
             </TitledPane>
           </center>
           <right>
-            <TitledPane animated="false" collapsible="false" prefHeight="736.0" text="Lehetőségek">
+            <TitledPane animated="false" collapsible="false" prefHeight="736.0" text="Lehetőségek és információk">
               <content>
                 <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                   <children>
@@ -40,15 +40,29 @@
                       <items>
                         <AnchorPane minHeight="0.0" minWidth="0.0" opacity="1.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #666666">
                           <children>
-                            <RadioButton fx:id="nodeModeRb" layoutX="14.0" layoutY="15.0" mnemonicParsing="false" onAction="#modeChanged" selected="true" text="Csúcselhelyezés" textFill="WHITE">
+                            <RadioButton fx:id="nodeModeRb" layoutX="14.0" layoutY="15.0" mnemonicParsing="false" onAction="#modeChanged" selected="true" text="Csúcs mód" textFill="WHITE">
                               <toggleGroup>
                                 <ToggleGroup fx:id="modeGroup" />
                               </toggleGroup>
                             </RadioButton>
-                            <RadioButton fx:id="arcModeRb" layoutX="14.0" layoutY="39.0" mnemonicParsing="false" onAction="#modeChanged" text="Él elhelyezés" textFill="WHITE" toggleGroup="$modeGroup" />
-                            <RadioButton fx:id="deleteModeRb" layoutX="14.0" layoutY="62.0" mnemonicParsing="false" onAction="#modeChanged" text="Törlés" textFill="WHITE" toggleGroup="$modeGroup" />
-                            <Button layoutX="13.0" layoutY="237.0" mnemonicParsing="false" onAction="#clearGraph" prefWidth="171.0" text="Gráf törlése..." />
+                            <RadioButton fx:id="arcModeRb" layoutX="14.0" layoutY="39.0" mnemonicParsing="false" onAction="#modeChanged" text="Él mód" textFill="WHITE" toggleGroup="$modeGroup" />
+                            <RadioButton fx:id="deleteModeRb" layoutX="14.0" layoutY="62.0" mnemonicParsing="false" onAction="#modeChanged" text="Törlés mód" textFill="WHITE" toggleGroup="$modeGroup" />
+                            <Button layoutX="13.0" layoutY="237.0" mnemonicParsing="false" onAction="#clearGraph" prefWidth="171.0" text="Gráf törlése...">
+                              <tooltip>
+                                <Tooltip autoFix="true" graphicTextGap="20.0" text="Teljes gráf törlése" textAlignment="LEFT" textOverrun="LEADING_WORD_ELLIPSIS" />
+                              </tooltip>
+                            </Button>
                             <Button fx:id="btClearSelectedNode" disable="true" layoutX="15.0" layoutY="203.0" mnemonicParsing="false" onAction="#clearSelectedNode" prefWidth="171.0" text="Csúcskijelölés törlése..." />
+                            <Label layoutX="13.0" layoutY="91.0" text="Csúcsok száma" textFill="WHITE" />
+                            <Label layoutX="126.0" layoutY="91.0" text="Élek száma" textFill="WHITE" />
+                            <Label fx:id="lbNodeCount" alignment="BASELINE_CENTER" layoutX="13.0" layoutY="107.0" prefWidth="77.0" text="0" textAlignment="CENTER" textFill="#ccd4ff" underline="true" wrapText="false" />
+                            <Label fx:id="lbArcCount" alignment="BASELINE_CENTER" layoutX="123.0" layoutY="107.0" prefWidth="61.0" text="0" textAlignment="CENTER" underline="true" wrapText="false">
+                              <textFill>
+                                <Color blue="1.000" green="0.831" red="0.800" fx:id="x1" />
+                              </textFill>
+                            </Label>
+                            <Label layoutX="13.0" layoutY="128.0" text="Irányított a gráf:" textFill="WHITE" />
+                            <Label id="lbNodeCount" fx:id="lbDirected" alignment="CENTER_LEFT" layoutX="106.0" layoutY="128.0" prefWidth="34.0" text="Nem" textAlignment="LEFT" textFill="$x1" underline="true" wrapText="false" />
                           </children>
                         </AnchorPane>
                         <AnchorPane maxHeight="200.0" minHeight="200.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
@@ -56,7 +70,7 @@
                             <Pane layoutX="-1.0" layoutY="0.0" maxHeight="201.0" minHeight="150.0" prefHeight="201.0" prefWidth="202.0" style="-fx-background-color: #666666">
                               <children>
                                 <Button fx:id="btRun" layoutX="14.0" layoutY="64.0" mnemonicParsing="false" onAction="#btRunClicked" prefWidth="70.0" text="Futtatás" />
-                                <ComboBox editable="false" layoutX="14.0" layoutY="29.0" prefHeight="21.0" prefWidth="173.9998779296875" promptText="">
+                                <ComboBox fx:id="cbAlgoritmSelector" editable="false" layoutX="14.0" layoutY="29.0" onAction="#onAlgorithmChanged" prefHeight="21.0" prefWidth="173.9998779296875" promptText="">
                                   <items>
                                     <FXCollections fx:factory="observableArrayList">
                                       <String fx:value="Item 1" />
