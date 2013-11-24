@@ -65,17 +65,16 @@ public class MainController implements Initializable {
 
     protected static final String NODE_ID_KEY = "NodeId";
     protected static final String LABEL_KEY = "Label";
-    protected static final String ATTACHED_CIRCLE_KEY = "AttachedCircle";
+    protected static final String ATTACHED_CIRCLE_KEY = "AttachedNode";
     protected static final String INBOUND_ARC_PREFIX = "INBOUNDARC_";
     protected static final String OUTBOUND_ARC_PREFIX = "OUTBOUNDARC_";
-    protected static final String NODE_TO_KEY = "NodeTo";
-    protected static final String NODE_FROM_KEY = "NodeFrom";
+    protected static final int ARC_DISTANCE = 8;
     protected Graph<ColorableGraphNode, ColorableGraphArc> graph = new ExtendedDirectedGraph<>();
     private Mode currentMode;
-    private Circle selectedNode = null;
-    private Circle selectedNodeInArcMode = null;
-    private HashMap<Integer, Circle> circles = new HashMap<>();
-    private Circle arcTo;
+    private Node selectedNode = null;
+    private Node selectedNodeInArcMode = null;
+    private HashMap<Integer, Node> circles = new HashMap<>();
+    private Node arcTo;
     @FXML
     private ComboBox<AlgorithmModel> cbAlgoritmSelector;
     @FXML
@@ -101,9 +100,9 @@ public class MainController implements Initializable {
     @FXML
     private ListView<String> lvLog;
 
-    protected void setSelectedNode(Circle c) {
+    protected void setSelectedNode(Node c) {
         if (c != null) {
-            log("Current node: " + c.getProperties().get(NODE_ID_KEY));
+            log("Current node: " + c.getNodeId());
             btClearSelectedNode.setDisable(false);
         }
         selectedNode = c;
@@ -134,7 +133,7 @@ public class MainController implements Initializable {
 
         log(cbAlgoritmSelector.getSelectionModel().getSelectedItem().getName());
     }
-    Line line = null;
+    Arc arc = null;
 
     private double distance(double ax, double ay, double bx, double by) {
         return Math.sqrt(Math.pow(ax - bx, 2) + Math.pow(ay - by, 2));
@@ -155,40 +154,39 @@ public class MainController implements Initializable {
                 label.setX(e.getX() - label.getLayoutBounds().getWidth() / 2 + 1);
                 label.setY(e.getY() + 5);
                 for (Map.Entry<Object, Object> p : selectedNode.getProperties().entrySet()) {
-                    if (p.getValue() instanceof Line) {
-                        Line l = (Line) p.getValue();
-                        Integer u = (Integer) l.getProperties().get(NODE_FROM_KEY);
-                        Integer v = (Integer) l.getProperties().get(NODE_TO_KEY);
+                    if (p.getValue() instanceof Arc) {
+                        Arc arc = (Arc) p.getValue();
+                        Integer u = arc.getNodeFromId();
+                        Integer v = arc.getNodeToId();
                         log(u + "|" + v);
-                        Circle nodeTo = circles.get(v);
-                        Circle nodeFrom = circles.get(u);
+                        Node nodeTo = circles.get(v);
+                        Node nodeFrom = circles.get(u);
                         if (graph.getArc(v, u) != null) {
 
-                            Pair<Point2D, Point2D> points1 = getPoints(nodeFrom.getCenterX(), nodeFrom.getCenterY(), nodeTo.getCenterX(), nodeTo.getCenterY(), 15);
-                            Pair<Point2D, Point2D> points2 = getPoints(nodeTo.getCenterX(), nodeTo.getCenterY(), nodeFrom.getCenterX(), nodeFrom.getCenterY(), 15);
+                            Pair<Point2D, Point2D> points1 = getPoints(nodeFrom.getCenterX(), nodeFrom.getCenterY(), nodeTo.getCenterX(), nodeTo.getCenterY(), ARC_DISTANCE);
+                            Pair<Point2D, Point2D> points2 = getPoints(nodeTo.getCenterX(), nodeTo.getCenterY(), nodeFrom.getCenterX(), nodeFrom.getCenterY(), ARC_DISTANCE);
                             if (u < v) {
-                                moveLine(l, points1.getKey().getX(), points1.getKey().getY(), points2.getKey().getX(), points2.getKey().getY());
+                                moveArc(arc, points1.getKey().getX(), points1.getKey().getY(), points2.getKey().getX(), points2.getKey().getY());
                             } else {
-                                moveLine(l, points1.getValue().getX(), points1.getValue().getY(), points2.getValue().getX(), points2.getValue().getY());
+                                moveArc(arc, points1.getValue().getX(), points1.getValue().getY(), points2.getValue().getX(), points2.getValue().getY());
                             }
                         } else {
-                            moveLine(l, nodeFrom.getCenterX(), nodeFrom.getCenterY(), nodeTo.getCenterX(), nodeTo.getCenterY());
+                            moveArc(arc, nodeFrom.getCenterX(), nodeFrom.getCenterY(), nodeTo.getCenterX(), nodeTo.getCenterY());
                         }
                     }
                 }
             }
         }
         if (e.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.ARC)) {
-            if (line != null) {
-                line.setEndX(e.getX());
-                line.setEndY(e.getY());
+            if (arc != null) {
+                arc.setEnd(e.getX(), e.getY());;
             }
-            for (Circle c : circles.values()) {
+            for (Node c : circles.values()) {
                 if (distance(e.getX(), e.getY(), c.getCenterX(), c.getCenterY()) < c.getRadius()) {
                     arcTo = c;
                 }
             }
-            //ap.getChildren().add(new Circle(e.getX(), e.getY(), 1));
+            //ap.getChildren().add(new Node(e.getX(), e.getY(), 1));
         }
     }
 
@@ -201,10 +199,9 @@ public class MainController implements Initializable {
     public void mousePressed(MouseEvent e) throws Exception {
         if (e.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.NODE)) {
             Integer id = graph.createNode(new ColorableGraphNode());
-            final Circle c = new Circle(20);
+            final Node c = new Node(id,20);
             ap.getChildren().add(c);
             circles.put(id, c);
-            c.getProperties().put(NODE_ID_KEY, id);
             c.setCenterX(e.getX());
             c.setCenterY(e.getY());
             Text label = new Text(id.toString());
@@ -221,12 +218,12 @@ public class MainController implements Initializable {
             EventHandler<MouseEvent> mouseClickedEventHandler = new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent t) {
-                    Circle circle = null;
+                    Node circle = null;
                     if (t.getSource() instanceof Text) {
                         Text label = (Text) t.getSource();
-                        circle = (Circle) label.getProperties().get(ATTACHED_CIRCLE_KEY);
+                        circle = (Node) label.getProperties().get(ATTACHED_CIRCLE_KEY);
                     } else {
-                        circle = (Circle) t.getSource();
+                        circle = (Node) t.getSource();
                     }
                     if (currentMode.equals(Mode.NODE)) {
                         setSelectedNode(circle);
@@ -236,7 +233,13 @@ public class MainController implements Initializable {
                         mousepos.x = t.getX();
                         mousepos.y = t.getY();
                     } else if (currentMode.equals(Mode.DELETE)) {
-                        Integer nodeId = (Integer) circle.getProperties().get(NODE_ID_KEY);
+                        Integer nodeId = circle.getNodeId();
+                        for (Map.Entry<Object, Object> p : circle.getProperties().entrySet()) {
+                            Object o = p.getValue();
+                            if (o instanceof Arc){
+                                Arc arc = (Arc)o;
+                            }
+                        }
                         graph.removeNode(nodeId);
                         ap.getChildren().remove(circle);
                         if (selectedNode == circle) {
@@ -255,9 +258,9 @@ public class MainController implements Initializable {
                         } else {
                             try {
                                 arcTo = circle;
-                                Integer u = (Integer) selectedNodeInArcMode.getProperties().get(NODE_ID_KEY);
-                                Integer v = (Integer) arcTo.getProperties().get(NODE_ID_KEY);
-                                log(selectedNodeInArcMode.getProperties().get(NODE_ID_KEY) + "-->" + arcTo.getProperties().get(NODE_ID_KEY));
+                                Integer u = selectedNodeInArcMode.getNodeId();
+                                Integer v = arcTo.getNodeId();
+                                log(selectedNodeInArcMode.getNodeId() + "-->" + arcTo.getNodeId());
                                 if (graph.getArc(u, v) != null) {
                                     MessageBox.show(null, "Többszörös él nem megengedett!", "Hiba", MessageBox.OK);
                                 } else {
@@ -290,12 +293,12 @@ public class MainController implements Initializable {
             EventHandler<MouseEvent> mouseReleasedEventHandler = new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent t) {
-                    Circle circle = null;
+                    Node circle = null;
                     if (t.getSource() instanceof Text) {
                         Text label = (Text) t.getSource();
-                        circle = (Circle) label.getProperties().get(ATTACHED_CIRCLE_KEY);
+                        circle = (Node) label.getProperties().get(ATTACHED_CIRCLE_KEY);
                     } else {
-                        circle = (Circle) t.getSource();
+                        circle = (Node) t.getSource();
                     }
                     if (currentMode.equals(Mode.NODE)) {
                         System.out.println("Hello");
@@ -304,43 +307,43 @@ public class MainController implements Initializable {
                         mousepos.x = t.getX();
                         mousepos.y = t.getY();
                     } else if (currentMode.equals(Mode.ARC)) {
-                        if (line != null && selectedNodeInArcMode != null) {
+                        if (arc != null && selectedNodeInArcMode != null) {
                             try {
                                 //arcTo = circle;
-                                Integer u = (Integer) selectedNodeInArcMode.getProperties().get(NODE_ID_KEY);
-                                Integer v = (Integer) arcTo.getProperties().get(NODE_ID_KEY);
-                                log(selectedNodeInArcMode.getProperties().get(NODE_ID_KEY) + "-->" + arcTo.getProperties().get(NODE_ID_KEY));
+                                Integer u = selectedNodeInArcMode.getNodeId();
+                                Integer v = arcTo.getNodeId();
+                                log(selectedNodeInArcMode.getNodeId() + "-->" + arcTo.getNodeId());
                                 if (graph.getArc(u, v) != null) {
                                     MessageBox.show(null, "Többszörös él nem megengedett!", "Hiba", MessageBox.OK);
-                                    ap.getChildren().remove(line);
+                                    ap.getChildren().remove(arc);
                                 } else {
                                     if (!u.equals(v)) {
-                                        graph.createArc(u, v, 1.0f, new ColorableGraphArc());
-
-                                        arcTo.getProperties().put(INBOUND_ARC_PREFIX + selectedNodeInArcMode.getProperties().get(NODE_ID_KEY).toString(), line);
-                                        selectedNodeInArcMode.getProperties().put(OUTBOUND_ARC_PREFIX + arcTo.getProperties().get(NODE_ID_KEY).toString(), line);
-                                        Pair<Point2D, Point2D> points1 = getPoints(selectedNodeInArcMode.getCenterX(), selectedNodeInArcMode.getCenterY(), arcTo.getCenterX(), arcTo.getCenterY(), 15);
-                                        Pair<Point2D, Point2D> points2 = getPoints(arcTo.getCenterX(), arcTo.getCenterY(), selectedNodeInArcMode.getCenterX(), selectedNodeInArcMode.getCenterY(), 15);
-                                        line.getProperties().put(NODE_TO_KEY, v);
-                                        line.getProperties().put(NODE_FROM_KEY, u);
+                                        Integer id = graph.createArc(u, v, 1.0f, new ColorableGraphArc());
+                                        arc.setGraphArc(graph.getArc(id));
+                                        arcTo.getProperties().put(INBOUND_ARC_PREFIX + selectedNodeInArcMode.getNodeId().toString(), arc);
+                                        selectedNodeInArcMode.getProperties().put(OUTBOUND_ARC_PREFIX + arcTo.getNodeId().toString(), arc);
+                                        Pair<Point2D, Point2D> points1 = getPoints(selectedNodeInArcMode.getCenterX(), selectedNodeInArcMode.getCenterY(), arcTo.getCenterX(), arcTo.getCenterY(), ARC_DISTANCE);
+                                        Pair<Point2D, Point2D> points2 = getPoints(arcTo.getCenterX(), arcTo.getCenterY(), selectedNodeInArcMode.getCenterX(), selectedNodeInArcMode.getCenterY(), ARC_DISTANCE);
+                                        arc.setNodeToId(v);
+                                        arc.setNodeFromId(u);
 
                                         if (graph.getArc(v, u) != null) {
-                                            Line otherLine = (Line) selectedNodeInArcMode.getProperties().get(INBOUND_ARC_PREFIX + arcTo.getProperties().get(NODE_ID_KEY).toString());
+                                            Arc otherArc = (Arc) selectedNodeInArcMode.getProperties().get(INBOUND_ARC_PREFIX + arcTo.getNodeId().toString());
                                             if (u < v) {
-                                                moveLine(line, points1.getKey().getX(), points1.getKey().getY(), points2.getKey().getX(), points2.getKey().getY());
-                                                moveLine(otherLine, points1.getValue().getX(), points1.getValue().getY(), points2.getValue().getX(), points2.getValue().getY());
+                                                moveArc(arc, points1.getKey().getX(), points1.getKey().getY(), points2.getKey().getX(), points2.getKey().getY());
+                                                moveArc(otherArc, points1.getValue().getX(), points1.getValue().getY(), points2.getValue().getX(), points2.getValue().getY());
                                             } else {
-                                                moveLine(otherLine, points1.getKey().getX(), points1.getKey().getY(), points2.getKey().getX(), points2.getKey().getY());
-                                                moveLine(line, points1.getValue().getX(), points1.getValue().getY(), points2.getValue().getX(), points2.getValue().getY());
+                                                moveArc(otherArc, points1.getKey().getX(), points1.getKey().getY(), points2.getKey().getX(), points2.getKey().getY());
+                                                moveArc(arc, points1.getValue().getX(), points1.getValue().getY(), points2.getValue().getX(), points2.getValue().getY());
                                             }
                                         } else {
-                                            moveLine(line, selectedNodeInArcMode.getCenterX(), selectedNodeInArcMode.getCenterY(), arcTo.getCenterX(), arcTo.getCenterY());
+                                            moveArc(arc, selectedNodeInArcMode.getCenterX(), selectedNodeInArcMode.getCenterY(), arcTo.getCenterX(), arcTo.getCenterY());
                                         }
                                         lbArcCount.setText(Integer.toString(graph.getArcCount()));
                                         lbDirected.setText(graph.isDirected() ? "Igen" : "Nem");
                                     } else {
                                         MessageBox.show(null, "A hurokélek nem megengedettek!", "Hiba", MessageBox.OK);
-                                        ap.getChildren().remove(line);
+                                        ap.getChildren().remove(arc);
 
                                     }
                                 }
@@ -349,7 +352,7 @@ public class MainController implements Initializable {
 
 
                                 arcTo = null;
-                                line = null;
+                                arc = null;
                                 selectedNodeInArcMode = null;
                             } catch (Exception ex) {
                                 Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
@@ -365,12 +368,12 @@ public class MainController implements Initializable {
             EventHandler<MouseEvent> mousePressedEventHandler = new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent t) {
-                    Circle circle = null;
+                    Node circle = null;
                     if (t.getSource() instanceof Text) {
                         Text label = (Text) t.getSource();
-                        circle = (Circle) label.getProperties().get(ATTACHED_CIRCLE_KEY);
+                        circle = (Node) label.getProperties().get(ATTACHED_CIRCLE_KEY);
                     } else {
-                        circle = (Circle) t.getSource();
+                        circle = (Node) t.getSource();
                     }
                     if (currentMode.equals(Mode.NODE)) {
                         System.out.println("Hello");
@@ -380,23 +383,23 @@ public class MainController implements Initializable {
                         mousepos.y = t.getY();
                     } else if (currentMode.equals(Mode.ARC)) {
                         selectedNodeInArcMode = circle;
-                        line = new Line(circle.getCenterX(), circle.getCenterY(), t.getX(), t.getY());
-                        line.setStrokeWidth(1.5);
+                        arc = new Arc(circle.getCenterX(), circle.getCenterY(), t.getX(), t.getY());
+                        arc.setStrokeWidth(1.5);
 
-                        ap.getChildren().add(line);
-                        line.toBack();
-                        line.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+                        ap.getChildren().add(arc);
+                        arc.toBack();
+                        arc.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
                             @Override
                             public void handle(MouseEvent t) {
-                                Line l = (Line) t.getTarget();
+                                Arc l = (Arc) t.getTarget();
                                 l.setStroke(Color.RED);
                                 t.consume();
                             }
                         });
-                        line.addEventFilter(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+                        arc.addEventFilter(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
                             @Override
                             public void handle(MouseEvent t) {
-                                Line l = (Line) t.getTarget();
+                                Arc l = (Arc) t.getTarget();
                                 l.setStroke(Color.BLACK);
                                 t.consume();
                             }
@@ -412,14 +415,14 @@ public class MainController implements Initializable {
             EventHandler<MouseEvent> mouseMovedEventHandler = new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent t) {
-                    Circle circle = null;
+                    Node circle = null;
                     if (t.getSource() instanceof Text) {
                         Text label = (Text) t.getSource();
-                        circle = (Circle) label.getProperties().get(ATTACHED_CIRCLE_KEY);
+                        circle = (Node) label.getProperties().get(ATTACHED_CIRCLE_KEY);
                     } else {
-                        circle = (Circle) t.getSource();
+                        circle = (Node) t.getSource();
                     }
-                    log(System.currentTimeMillis() + "Moved on:" + circle.getProperties().get(NODE_ID_KEY));
+                    log(System.currentTimeMillis() + "Moved on:" + circle.getNodeId());
                     t.consume();
                 }
             };
@@ -447,7 +450,7 @@ public class MainController implements Initializable {
         log("Current mode: " + currentMode.toString());
     }
 
-    private Polyline getPolylineArc(Point2D tip, Point2D tail, int mode) {
+    private void getPolylineArc(Point2D tip, Point2D tail, int mode) {
         Polyline pl = new Polyline();
         double dy = tip.getY() - tail.getY();
         double dx = tip.getX() - tail.getX();
@@ -455,14 +458,12 @@ public class MainController implements Initializable {
         //System.out.println("theta = " + Math.toDegrees(theta));  
         double phi = Math.toRadians(30);
 
-        double x, y, rho = theta + phi;
-        for (int j = 0; j < 2; j++) {
-            x = tip.getX() - 20 * Math.cos(rho);
-            y = tip.getY() - 20 * Math.sin(rho);
-
+        double x1, y1,x2,y2, rho = theta + phi;
+            x1 = tip.getX() - 20 * Math.cos(rho);
+            y1 = tip.getY() - 20 * Math.sin(rho);
             rho = theta - phi;
-        }
-        return null;
+            x2 = tip.getX() - 20 * Math.cos(rho);
+            y2 = tip.getY() - 20 * Math.sin(rho);
     }
 
     @FXML
@@ -544,8 +545,8 @@ public class MainController implements Initializable {
     }
 
     private void refreshGraphView() {
-        for (Circle c : circles.values()) {
-            Integer id = (Integer) c.getProperties().get(NODE_ID_KEY);
+        for (Node c : circles.values()) {
+            Integer id = c.getNodeId();
             ColorableGraphNode node = graph.getNode(id);
             Color color = getNodeColor(node.getColor());
             Color textColor = getNodeTextColor(node.getColor());
@@ -558,7 +559,7 @@ public class MainController implements Initializable {
                 selectedNode.setStroke(Color.RED);
             } else {
                 c.setStrokeWidth(3);
-                c.setStroke(getNodeColor(graph.getNode((Integer) c.getProperties().get(NODE_ID_KEY)).getColor()));
+                c.setStroke(getNodeColor(graph.getNode(c.getNodeId()).getColor()));
             }
             //Tooltip.install(c, new Tooltip(c.getProperties().get(NODE_ID_KEY).toString()));
         }
@@ -668,18 +669,105 @@ public class MainController implements Initializable {
         double E = A * A + a * a * (v * v - r * r);
         double sy1 = (double) (-D + Math.sqrt(D * D - 4 * C * E)) / (2 * C);
         double sy2 = (double) (-D - Math.sqrt(D * D - 4 * C * E)) / (2 * C);
-        double sx1 = (u != x) ? (c - b * sy1) / a : u;
-        double sx2 = (u != x) ? (c - b * sy2) / a : u;
-        System.out.println(Arrays.toString(new double[]{vx, vy, a, b, c, A, C, D, E, D * D - 4 * C * E}));
-        System.out.println("(" + sx1 + "," + sy1 + ")");
-        System.out.println("(" + sx2 + "," + sy2 + ")");
+        double sx1 = (u != x) ? (c - b * sy1) / a : u-r;
+        double sx2 = (u != x) ? (c - b * sy2) / a : u+r;
+//        System.out.println(Arrays.toString(new double[]{vx, vy, a, b, c, A, C, D, E, D * D - 4 * C * E}));
+//        System.out.println("(" + sx1 + "," + sy1 + ")");
+//        System.out.println("(" + sx2 + "," + sy2 + ")");
         return new Pair(new Point2D(sx1, sy1), new Point2D(sx2, sy2));
     }
 
-    protected void moveLine(Line line, double startX, double startY, double endX, double endY) {
-        line.setStartX(startX);
-        line.setStartY(startY);
-        line.setEndX(endX);
-        line.setEndY(endY);
+    protected void moveArc(Arc arc, double startX, double startY, double endX, double endY) {
+        arc.setStart(startX, startY);
+        arc.setEnd(endX, endY);
+    }
+    
+    protected class Node extends Circle {
+        protected Integer nodeId;
+
+        public Node(Integer nodeId) {
+            this.nodeId = nodeId;
+        }
+
+        public Node(Integer nodeId, double d) {
+            super(d);
+            this.nodeId = nodeId;
+        }
+
+        public Integer getNodeId() {
+            return nodeId;
+        }
+
+        public void setNodeId(Integer nodeId) {
+            this.nodeId = nodeId;
+        }
+        
+        
+        
+    }
+    
+    protected class Arc extends Line {
+        
+        protected Integer nodeToId;
+        protected Integer nodeFromId;
+        protected ColorableGraphArc graphArc;
+        protected Text label = new Text("1");
+        
+        {
+            label.setFill(Color.ANTIQUEWHITE);
+        }
+
+        public Arc(double d, double d1, double d2, double d3) {
+            super(d, d1, d2, d3);
+            refreshLabel();
+        }
+        
+        public void setEnd(double x, double y){
+            setEndX(x);
+            setEndY(y);
+            refreshLabel();
+        }
+        
+        public void setStart(double x, double y){
+            setStartX(x);
+            setStartY(y);
+            refreshLabel();
+        }
+
+        public Integer getNodeToId() {
+            return nodeToId;
+            
+        }
+
+        public void setNodeToId(Integer nodeToId) {
+            this.nodeToId = nodeToId;
+        }
+
+        public Integer getNodeFromId() {
+            return nodeFromId;
+        }
+
+        public void setNodeFromId(Integer nodeFromId) {
+            this.nodeFromId = nodeFromId;
+        }
+
+        public ColorableGraphArc getGraphArc() {
+            return graphArc;
+        }
+
+        public void setGraphArc(ColorableGraphArc graphArc) {
+            this.graphArc = graphArc;
+            ap.getChildren().add(label);
+            refreshLabel();
+        }
+
+
+        private void refreshLabel(){
+            label.setX((getEndX()+getStartX()-label.getWrappingWidth())/2);
+            label.setY((getEndY()+getStartY())/2);
+//            label.setX(20);
+//            label.setY(100);
+        }
+        
     }
 }

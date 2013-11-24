@@ -47,6 +47,8 @@ public interface Graph<N extends GeneralGraphNode, A extends GeneralGraphArc> ex
     
     public void clear();
     
+    public void clearColors();
+    
     public interface NodeArcFactory<N,A> {
         public N createNode();
         public A createArc();

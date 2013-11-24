@@ -12,7 +12,7 @@ import hu.elte.graphalgorithms.core.GeneralGraphArc;
  */
 public class ColorableGraphArc extends GeneralGraphArc {
     public enum Color {WHITE,GRAY,BLACK,RED,BLUE,GREEN,YELLOW,PURPLE};
-        private Color color = Color.WHITE;
+    private Color color = Color.BLACK;
     
     public void setColor(Color color){
         this.color = color;
