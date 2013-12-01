@@ -29,23 +29,25 @@ public class BreadthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode,
     private Map<ColorableGraphNode, Color> colors;
     private Queue<ColorableGraphNode> queue;
     private int step;
-
+    private boolean initialized;
+    private boolean started;
     @Override
-    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g) throws Exception {
+    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g){
         this.graph = g;
         predecessors = new TreeMap<>();
         distance = new TreeMap<>();
         colors = new TreeMap<>();
         queue = new LinkedList<>();
+        initialized = true;
     }
 
     @Override
-    public String run() throws Exception {
+    public String run()  {
         return run(null);
     }
 
     @Override
-    public String run(ColorableGraphNode s) throws Exception {
+    public String run(ColorableGraphNode s) {
         StringBuilder result = new StringBuilder();
         result.append(s == null ? start() : start(s));
         while (!queue.isEmpty()) {
@@ -55,34 +57,26 @@ public class BreadthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode,
     }
 
     @Override
-    public String start() throws Exception {
-        if (graph == null) {
-            throw new UnsupportedOperationException("Graph is not yet set.");
-        }
+    public String start() {
         List<ColorableGraphNode> nodes = graph.getNodes();
-        if (nodes == null || nodes.isEmpty()) {
-            throw new UnsupportedOperationException("Graph does not contain nodes."); //To change body of generated methods, choose Tools | Templates.
-        }
         return start(nodes.get(0));
     }
 
     @Override
-    public String start(ColorableGraphNode s) throws Exception {
+    public String start(ColorableGraphNode s) {
         step = 0;
-        if (graph == null) {
-            throw new UnsupportedOperationException("Graph is not yet set.");
-        }
         for (ColorableGraphNode node : graph.getNodes()) {
             if (node != s) {
-                colors.put(node, WHITE);
+                setColor(node, WHITE);
                 predecessors.put(node, null);
                 distance.put(node, Long.MAX_VALUE);
             }
         }
-        colors.put(s, GRAY);
+        setColor(s, GRAY);
         predecessors.put(s, null);
         distance.put(s, 0l);
         queue.offer(s);
+        started = true;
         return dumpState();
     }
 
@@ -98,11 +92,9 @@ public class BreadthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode,
     }
 
     @Override
-    public String doStep() throws Exception {
-        if (queue.isEmpty()) {
-            throw new UnsupportedOperationException("the queue is empty");
-        }
+    public String doStep() {
         step++;
+        if (queue.isEmpty()) return null;
         ColorableGraphNode node = queue.poll();
         List<ColorableGraphArc> outgoing = graph.getOutboundArcs(node.getId());
         Set<ColorableGraphNode> outgoingNodes = new TreeSet<>();
@@ -111,13 +103,21 @@ public class BreadthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode,
         }
         for (ColorableGraphNode adjacent : outgoingNodes) {
             if (colors.get(adjacent).equals(WHITE)) {
-                colors.put(adjacent, GRAY);
+                setColor(adjacent, GRAY);
                 distance.put(adjacent, distance.get(node) + 1);
                 predecessors.put(adjacent, node);
+                graph.getArc(node.getId(), adjacent.getId()).setColor(ColorableGraphArc.Color.BLUE);
                 queue.offer(adjacent);
             }
         }
-        colors.put(node, BLACK);
+        setColor(node, BLACK);
         return dumpState();
+    }
+    
+    private void setColor(ColorableGraphNode node, Color color) {
+        if (node != null) {
+            colors.put(node, color);
+            node.setColor(color);
+        }
     }
 }

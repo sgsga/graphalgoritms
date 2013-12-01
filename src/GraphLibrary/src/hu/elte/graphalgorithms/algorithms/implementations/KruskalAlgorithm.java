@@ -30,6 +30,7 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
         }
         graph = g;
         nodeSets.clear();
+        // Creates unique sets
         if (g.getNodeCount() > 0) {
             for (ColorableGraphNode node : g.getNodes()) {
                 nodeSets.put(node.getId(), node.getId());
@@ -40,16 +41,22 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
     @Override
     public String run() {
         start();
-        while (!sortedArcs.isEmpty()) {
+        for (ColorableGraphArc ga : graph.getArcs()) {
+            System.out.println(ga.toString());
+
+        }
+        int coloredArcs = 0;
+        while (!sortedArcs.isEmpty() && coloredArcs<graph.getArcCount()) {
             ColorableGraphArc currentArc = sortedArcs.poll();
             if (currentArc.getFromId() > currentArc.getToId()) {
-                continue;
+                //continue;
             }
-            if (currentArc.getColor() != ColorableGraphArc.Color.WHITE) {
+            if (currentArc.getColor() != ColorableGraphArc.Color.BLACK) {
                 continue;
             }
 
             if (!nodeSets.get(currentArc.getFromId()).equals(nodeSets.get(currentArc.getToId()))) {
+                // Merge sets
                 for (Integer nodeId : nodeSets.keySet()) {
                     if (nodeSets.get(nodeId).equals(nodeSets.get(currentArc.getToId()))) {
                         nodeSets.put(nodeId, nodeSets.get(currentArc.getFromId()));
@@ -59,10 +66,12 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
                 graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.BLUE);
                 graph.getNode(currentArc.getFromId()).setColor(ColorableGraphNode.Color.GREEN);
                 graph.getNode(currentArc.getToId()).setColor(ColorableGraphNode.Color.GREEN);
+                
             } else {
                 currentArc.setColor(ColorableGraphArc.Color.RED);
                 graph.getPairOfArc(currentArc.getId()).setColor(ColorableGraphArc.Color.RED);
             }
+            coloredArcs += 2;
         }
         return null;
     }
@@ -75,7 +84,7 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
     @Override
     public String start() {
         sortedArcs.clear();
-        sortedArcs = new PriorityQueue<>(1, new GeneralGraphArcLessCostComparator<>(0.00001f));
+        sortedArcs = new PriorityQueue<>(1, new GeneralGraphArcLessCostComparator<>(0.001f));
         sortedArcs.addAll(graph.getArcs());
         return "";
     }

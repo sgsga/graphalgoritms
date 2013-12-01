@@ -7,27 +7,30 @@ package hu.elte.graphalgorithms.core;
 import com.google.gson.Gson;
 import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
 import hu.elte.graphalgorithms.core.exceptions.KeyAlreadyExistsException;
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  *
  * @author nagysan
  */
-public class GeneralGraphNode{
+public class GeneralGraphNode implements Serializable {
 
     private Integer id;
     private boolean idBlank = true;
     private HashMap<String, OwnedObjectContainer> additionalData;
     
 
-    public final void setId(Integer id) throws IdAlreadySetException {
-        if (idBlank) {
-            this.id = id;
-            idBlank = false;
-        } else {
-            throw new IdAlreadySetException();
-        }
+    public final void setId(Integer id) {
+        this.id = id;
+        idBlank = false;    
     }
+
+    public boolean isIdBlank() {
+        return idBlank;
+    }
+    
+    
     
     public final void addData(String key, Object o, Object owner) throws KeyAlreadyExistsException {
         if (additionalData == null) {

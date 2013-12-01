@@ -29,29 +29,42 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public final Integer createNode(N nodeData) throws IdAlreadySetException {
+    public final Integer createNode(N nodeData){
         int id = nodeSequence++;
-        nodeData.setId(id);
+        if (nodeData.isIdBlank()) {
+            nodeData.setId(id);
+        } else {
+            if (nodeSequence < nodeData.getId()) {
+                nodeSequence = nodeData.getId() + 1;
+            }
+            id = nodeData.getId();
+        }
         nodeDatas.put(id, nodeData);
         graph.put(id, new ConcurrentHashMap<Integer, Integer>());
         return id;
     }
 
     @Override
-    public final boolean removeNode(Integer id) {
+    public final ArrayList<Integer> removeNode(Integer id) {
+        ArrayList<Integer> result = null;
         if (nodeDatas.containsKey(id)) {
+            result = new ArrayList<>();
             List<A> inboundArcs = getInboundArcs(id);
             if (inboundArcs.size() > 0) {
                 for (A arcData : inboundArcs) {
                     graph.get(arcData.getFromId()).remove(arcData.getToId());
+                    result.add(arcData.getId());
                 }
+            }
+            
+            result.addAll(graph.get(id).values());
+            for (Integer arcId : result){
+                arcDatas.remove(arcId);
             }
             graph.remove(id);
             nodeDatas.remove(id);
-            return true;
-        } else {
-            return false;
         }
+        return result;
     }
 
     @Override
@@ -65,17 +78,25 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
     }
 
     @Override
-    public final Integer createArc(int startNode, int endNode, float cost, A arcData) throws IdAlreadySetException, ArcAlreadyExistsException {
-            ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(startNode);
-            if (!outboundArcs.containsKey(endNode)) {
-                int id = arcSequence++;
+    public final Integer createArc(int startNode, int endNode, float cost, A arcData) throws ArcAlreadyExistsException {
+        ConcurrentHashMap<Integer, Integer> outboundArcs = graph.get(startNode);
+        if (!outboundArcs.containsKey(endNode)) {
+            int id = arcSequence++;
+            if (!arcData.isInitialized()) {
+               
                 arcData.initialize(startNode, endNode, cost, id);
-                arcDatas.put(id, arcData);
-                outboundArcs.put(endNode, id);
-                return id;
             } else {
-                throw new ArcAlreadyExistsException();
+                if (arcSequence < arcData.getId()) {
+                    arcSequence = arcData.getId() + 1;
+                }
+                id = arcData.getId();
             }
+            arcDatas.put(id, arcData);
+            outboundArcs.put(endNode, id);
+            return id;
+        } else {
+            throw new ArcAlreadyExistsException();
+        }
     }
 
     @Override
@@ -177,9 +198,7 @@ public class DirectedGraph<N extends GeneralGraphNode, A extends GeneralGraphArc
 
     @Override
     public void clearColors() {
-        for(N node : nodeDatas.values()){
-            
+        for (N node : nodeDatas.values()) {
         }
     }
-
 }

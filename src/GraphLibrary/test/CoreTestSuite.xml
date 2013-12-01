@@ -24,6 +24,7 @@
         </packages>
         <classes>
             <class name="hu.elte.graphalgorithms.core.test.GraphTest" />
+            <class name="hu.elte.graphalgorithms.algorithms.implementations.BreadthFirstAlgorithmNGTest" />
         </classes>
     </test>
 

@@ -5,38 +5,41 @@
 package hu.elte.graphalgorithms.core;
 
 import hu.elte.graphalgorithms.core.exceptions.IdAlreadySetException;
+import java.io.Serializable;
 
 /**
  *
  * @author nagysan
  */
-public class GeneralGraphArc {
+public class GeneralGraphArc implements Serializable {
 
     private Integer id;
-    private boolean idBlank = true;
+    private boolean initialized = false;
     private Integer fromId;
     private Integer toId;
     private Float cost;
 
-    private final void setId(Integer id) throws IdAlreadySetException {
-        if (idBlank) {
-            this.id = id;
-            idBlank = false;
-        } else {
-            throw new IdAlreadySetException();
-        }
+    private final void setId(Integer id) {
+        this.id = id;
     }
 
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    
+    
     public final void setCost(Float cost) {
         this.cost = cost;
     }
 
     
-    public final void initialize(Integer fromId, Integer toId, Float cost, Integer id) throws IdAlreadySetException {
+    public final void initialize(Integer fromId, Integer toId, Float cost, Integer id) {
         this.fromId = fromId;
         this.toId = toId;
         this.cost = cost;
         setId(id);
+        initialized = true;
     }
 
     public final Integer getId() {
