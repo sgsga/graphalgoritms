@@ -4,8 +4,8 @@
  */
 package hu.elte.graphalgorithms;
 
-import com.sun.javafx.animation.transition.Position2D;
 import hu.elte.graphalgorithms.algorithms.implementations.BreadthFirstAlgorithm;
+import hu.elte.graphalgorithms.algorithms.implementations.DijkstraAlgorithm;
 import hu.elte.graphalgorithms.algorithms.implementations.KruskalAlgorithm;
 import hu.elte.graphalgorithms.algorithms.interfaces.GraphAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
@@ -27,10 +27,12 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -42,6 +44,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyEvent;
@@ -60,7 +63,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.Pair;
-import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import jfx.messagebox.MessageBox;
 
@@ -105,6 +107,8 @@ public class MainController implements Initializable {
     private HashMap<Integer, Arc> arcs = new HashMap<>();
     private GraphAlgorithm<ColorableGraphNode, ColorableGraphArc> algorithm;
     private Node arcTo;
+    private boolean animating = false;
+    private Timer timer = new Timer();
     @FXML
     private ComboBox<AlgorithmModel> cbAlgoritmSelector;
     @FXML
@@ -137,6 +141,12 @@ public class MainController implements Initializable {
     private Button btClearSelectedArc;
     @FXML
     private Button btStep;
+    @FXML
+    private Button btPlay;
+    @FXML
+    private Button btStop;
+    @FXML
+    private Slider slSpeed;
     Arc unboundArc = null;
     private GraphIO graphIO = new GraphIO();
     private EventHandler<MouseEvent> mouseClickedEventHandler;
@@ -175,7 +185,6 @@ public class MainController implements Initializable {
         assert deleteModeRb != null : "fx:id=\"deleteModeRb\" was not injected: check your FXML file 'Main.fxml'.";
         assert modeGroup != null : "fx:id=\"modeGroup\" was not injected: check your FXML file 'Main.fxml'.";
         assert nodeModeRb != null : "fx:id=\"nodeModeRb\" was not injected: check your FXML file 'Main.fxml'.";
-
         costPane.setVisible(false);
         btClearSelectedArc.setDisable(true);
         btClearSelectedNode.setDisable(true);
@@ -240,6 +249,8 @@ public class MainController implements Initializable {
                 } else if (currentMode.equals(Mode.ARC)) {
                     if (arcTo == null) {
                         ap.getChildren().remove(unboundArc);
+                        ap.getChildren().remove(unboundArc.getArrowLines()[0]);
+                        ap.getChildren().remove(unboundArc.getArrowLines()[1]);
                     }
                     if (unboundArc != null && selectedNodeInArcMode != null && arcTo != null) {
                         try {
@@ -324,7 +335,7 @@ public class MainController implements Initializable {
                     ap.getChildren().add(unboundArc);
                     ap.getChildren().add(unboundArc.getArrowLines()[0]);
                     ap.getChildren().add(unboundArc.getArrowLines()[1]);
-                    unboundArc.addEventFilter(MouseEvent.MOUSE_PRESSED,arcPressedEventHandler);
+                    unboundArc.addEventFilter(MouseEvent.MOUSE_PRESSED, arcPressedEventHandler);
                 }
                 t.consume();
             }
@@ -333,10 +344,10 @@ public class MainController implements Initializable {
             @Override
             public void handle(MouseEvent t) {
                 Arc l = (Arc) t.getTarget();
-                if (t.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.ARC)){
+                if (t.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.ARC)) {
                     l.setColor(Color.RED);
                     setSelectedArc(l);
-                } else if (t.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.DELETE)){
+                } else if (t.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.DELETE)) {
                     graph.removeArc(l.getGraphArc().getId());;
                     ap.getChildren().remove(l);
                     ap.getChildren().remove(l.getArrowLines()[0]);
@@ -457,6 +468,8 @@ public class MainController implements Initializable {
             label.addEventFilter(MouseEvent.MOUSE_PRESSED, mousePressedEventHandler);
             c.addEventFilter(MouseEvent.MOUSE_PRESSED, mousePressedEventHandler);
             refreshGraphView();
+        } else if (e.getButton().equals(MouseButton.PRIMARY) && currentMode.equals(Mode.ARC)) {
+            clearSelectedArc();
         }
     }
 
@@ -693,7 +706,17 @@ public class MainController implements Initializable {
                 ba.run();
             }
         }
-        
+
+        if (currentAlgorithm.id == DIJKSTRA_ALGO_CODE) {
+            DijkstraAlgorithm da = new DijkstraAlgorithm();
+            da.initialize(graph);
+            if (selectedNode != null) {
+                da.run(graph.getNode(selectedNode.getNodeId()));
+            } else {
+                da.run();
+            }
+        }
+
         refreshGraphView();
         MessageBox.show(null, "Az algoritmus sikeresen véget ért.", "Algoritmus vége", MessageBox.OK | MessageBox.ICON_INFORMATION);
         clearView();
@@ -711,6 +734,54 @@ public class MainController implements Initializable {
     }
 
     @FXML
+    public void btStopClicked() {
+        animating = false;
+        clearView();
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+        }
+        timer = null;
+        algorithm = null;
+        btPlay.setDisable(false);
+        btStop.setDisable(true);
+        btRun.setDisable(false);
+        btStep.setDisable(false);
+    }
+
+    @FXML
+    public void btPlayClicked() {
+        AlgorithmModel currentAlgorithm = cbAlgoritmSelector.getSelectionModel().getSelectedItem();
+        if (currentAlgorithm.needStartNode && selectedNode == null) {
+            MessageBox.show(null, "A kiválasztott algoritmus startcsúcsot igényel!", "Figyelmeztetés", MessageBox.OK | MessageBox.ICON_WARNING);
+            return;
+        }
+        if (currentAlgorithm.id == KRUSKAL_ALGO_CODE) {
+            if (graph.isDirected()) {
+                MessageBox.show(null, "A kiválasztott algoritmus irányítatlan gráfot igényel!", "Figyelmeztetés", MessageBox.OK | MessageBox.ICON_WARNING);
+                btRun.setDisable(false);
+                return;
+            }
+        }
+        btStep.setDisable(true);
+        btStop.setDisable(false);
+        btPlay.setDisable(true);
+        animating = true;
+        if (timer == null) {
+            timer = new Timer();
+        }
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (animating) {
+                    btStepClicked();
+                }
+            }
+        }, 0, (long) Math.ceil(slSpeed.getValue() * 2000));
+
+    }
+
+    @FXML
     public void btStepClicked() {
         AlgorithmModel currentAlgorithm = cbAlgoritmSelector.getSelectionModel().getSelectedItem();
         if (currentAlgorithm.needStartNode && selectedNode == null) {
@@ -718,6 +789,10 @@ public class MainController implements Initializable {
             return;
         }
         if (algorithm == null) {
+            btRun.setDisable(true);
+            btPlay.setDisable(true);
+            btStop.setDisable(false);
+            clearSelectedArc();
             if (currentAlgorithm.id == BFS_ALGO_CODE) {
                 BreadthFirstAlgorithm ba = new BreadthFirstAlgorithm();
                 ba.initialize(graph);
@@ -728,11 +803,50 @@ public class MainController implements Initializable {
                 }
                 algorithm = ba;
             }
+            if (currentAlgorithm.id == DIJKSTRA_ALGO_CODE) {
+                DijkstraAlgorithm da = new DijkstraAlgorithm();
+                da.initialize(graph);
+                if (selectedNode != null) {
+                    da.start(graph.getNode(selectedNode.getNodeId()));
+                } else {
+                    da.start();
+                }
+                algorithm = da;
+            }
+            if (currentAlgorithm.id == KRUSKAL_ALGO_CODE) {
+                if (graph.isDirected()) {
+                    MessageBox.show(null, "A kiválasztott algoritmus irányítatlan gráfot igényel!", "Figyelmeztetés", MessageBox.OK | MessageBox.ICON_WARNING);
+                    btRun.setDisable(false);
+                    btPlay.setDisable(false);
+                    btStep.setDisable(false);
+                    btStop.setDisable(true);
+                    return;
+                }
+                KruskalAlgorithm ka = new KruskalAlgorithm();
+                ka.initialize(graph);
+                ka.start();
+                algorithm = ka;
+            }
         } else {
             if (algorithm.doStep() == null) {
-                MessageBox.show(null, "Az algoritmus sikeresen véget ért.", "Algoritmus vége", MessageBox.OK | MessageBox.ICON_INFORMATION);
-                algorithm = null;
-                clearView();
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        animating = false;
+                        if (timer != null) {
+                            timer.cancel();
+                            timer.purge();
+                        }
+                        timer = null;
+                        MessageBox.show(null, "Az algoritmus sikeresen véget ért.", "Algoritmus vége", MessageBox.OK | MessageBox.ICON_INFORMATION);
+                        algorithm = null;
+                        clearView();
+                        btRun.setDisable(false);
+                        btPlay.setDisable(false);
+                        btStep.setDisable(false);
+                        btStop.setDisable(true);
+                    }
+                });
             }
 
         }
@@ -746,10 +860,10 @@ public class MainController implements Initializable {
 
     private void initAlgorithmList() {
         cbAlgoritmSelector.getItems().clear();
-        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Kruskal algoritmus", DIJKSTRA_ALGO_CODE, false));
-        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Dijkstra algoritmus", 1, true));
-        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Szélességi bejárás", 2, true));
-        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Mélységi bejárás", 3, true));
+        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Kruskal algoritmus", KRUSKAL_ALGO_CODE, false));
+        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Dijkstra algoritmus", DIJKSTRA_ALGO_CODE, true));
+        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Szélességi bejárás", BFS_ALGO_CODE, true));
+        cbAlgoritmSelector.getItems().add(new AlgorithmModel("Mélységi bejárás", DFS_ALGO_CODE, true));
         cbAlgoritmSelector.getSelectionModel().selectFirst();
         cbAlgoritmSelector.setCellFactory(new Callback<ListView<AlgorithmModel>, ListCell<AlgorithmModel>>() {
             @Override

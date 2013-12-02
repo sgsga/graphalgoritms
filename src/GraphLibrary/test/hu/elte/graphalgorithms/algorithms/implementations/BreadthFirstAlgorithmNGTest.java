@@ -234,10 +234,6 @@ public class BreadthFirstAlgorithmNGTest {
         assertEquals(testGraph.getNode(3).getColor(), ColorableGraphNode.Color.BLACK);
         assertEquals(testGraph.getNode(4).getColor(), ColorableGraphNode.Color.BLACK);
         
-        try {
-             instance.doStep();
-             fail("This should never happen.");
-        } catch (UnsupportedOperationException uo) {}
     }
     
     

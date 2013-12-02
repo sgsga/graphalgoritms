@@ -75,13 +75,6 @@ public class GraphTest {
         createdNodes.add(node2);
     }
 
-    @Test(description = "Add node with preset id",
-          dependsOnMethods = {"createGraphTest"}, expectedExceptions = {IdAlreadySetException.class})
-    public void createWrongNode() throws IdAlreadySetException {
-        GeneralGraphNode node1 = new GeneralGraphNode();
-        node1.setId(0);
-        graph.createNode(node1);
-    }
     
     @Test(description = "Check getNodes method",
           dependsOnMethods = {"createNodesTest"})

@@ -24,10 +24,7 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
     private PriorityQueue<ColorableGraphArc> sortedArcs = new PriorityQueue<>();
 
     @Override
-    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g) throws UndirectedGraphRequiredException {
-        if (g.isDirected()) {
-            throw new UndirectedGraphRequiredException();
-        }
+    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g)  {
         graph = g;
         nodeSets.clear();
         // Creates unique sets
