@@ -4,7 +4,6 @@ import hu.elte.graphalgorithms.algorithms.interfaces.GraphAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
 import hu.elte.graphalgorithms.core.interfaces.Graph;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -32,7 +31,7 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
     }
     
     @Override
-    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g)  {
+    public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g) {
         graph = g;
         time = 0;
         for (ColorableGraphNode node : g.getNodes()) {
@@ -42,39 +41,44 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
     }
 
     @Override
-    public String run(){
+    public String run() {
         start();
-        while (!stack.empty()) {
-            doStep();
+        for (ColorableGraphNode node : graph.getNodes()) {
+            if (ColorableGraphNode.Color.WHITE.equals(node.getColor())) {
+                doStep();
+                while(!stack.isEmpty()) {
+                    doStep();
+                }
+            }
         }
         return "";
     }
 
     @Override
-    public String run(ColorableGraphNode s){
+    public String run(ColorableGraphNode s) {
         return run();
     }
 
     @Override
     public String start() {
-//        if (!initialized) {
+        if (!initialized) {
 //            throw new UnsupportedOperationException("Not supported yet.");
-//        }
+        }
         started = true;
         return "";
     }
 
     @Override
-    public String start(ColorableGraphNode s){
+    public String start(ColorableGraphNode s) {
         start();
         return "";
     }
 
     @Override
-    public String doStep(){
-//        if (!started) {
+    public String doStep() {
+        if (!started) {
 //            throw new UnsupportedOperationException("Not supported yet.");
-//        }
+        }
         if (stack.isEmpty()) {
             for (ColorableGraphNode node : graph.getNodes()) {
                 if (ColorableGraphNode.Color.WHITE.equals(node.getColor())) {
