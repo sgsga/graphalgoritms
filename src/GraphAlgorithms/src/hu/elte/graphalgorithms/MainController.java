@@ -830,14 +830,6 @@ public class MainController implements Initializable {
             }
             
             if (currentAlgorithm.id == DFS_ALGO_CODE) {
-                if (graph.isDirected()) {
-                    MessageBox.show(null, "A kiválasztott algoritmus irányítatlan gráfot igényel!", "Figyelmeztetés", MessageBox.OK | MessageBox.ICON_WARNING);
-                    btRun.setDisable(false);
-                    btPlay.setDisable(false);
-                    btStep.setDisable(false);
-                    btStop.setDisable(true);
-                    return;
-                }
                 DepthFirstAlgorithm da = new DepthFirstAlgorithm();
                 da.initialize(graph);
                 if (selectedNode != null) {
