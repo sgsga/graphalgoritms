@@ -22,7 +22,7 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
     private boolean started;
     private Stack<ColorableGraphNode> stack = new Stack<ColorableGraphNode>();
     private int time;
-    
+    private ColorableGraphNode startNode = null;
     private void setColor(ColorableGraphNode node, ColorableGraphNode.Color color) {
         if (node != null) {
             colors.put(node, color);
@@ -42,7 +42,12 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
 
     @Override
     public String run() {
-        start();
+        return run(null);
+    }
+
+    @Override
+    public String run(ColorableGraphNode s) {
+        start(s);
         for (ColorableGraphNode node : graph.getNodes()) {
             if (ColorableGraphNode.Color.WHITE.equals(node.getColor())) {
                 doStep();
@@ -51,27 +56,22 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
                 }
             }
         }
-        return "";
-    }
-
-    @Override
-    public String run(ColorableGraphNode s) {
-        return run();
+        return hasFinished();
     }
 
     @Override
     public String start() {
-        if (!initialized) {
-//            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        started = true;
-        return "";
+        return start(null);
     }
 
     @Override
     public String start(ColorableGraphNode s) {
-        start();
-        return "";
+        if (!initialized) {
+//            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        started = true;
+        startNode = s;
+        return doStep();
     }
 
     @Override
@@ -79,11 +79,16 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
         if (!started) {
 //            throw new UnsupportedOperationException("Not supported yet.");
         }
+        if (startNode !=null) {
+            toGrey(startNode);
+            startNode = null;
+            return hasFinished();
+        }
         if (stack.isEmpty()) {
             for (ColorableGraphNode node : graph.getNodes()) {
                 if (ColorableGraphNode.Color.WHITE.equals(node.getColor())) {
                     toGrey(node);
-                    return "";
+                    return hasFinished();
                 }
             }
         } else {
@@ -95,14 +100,21 @@ public class DepthFirstAlgorithm implements GraphAlgorithm<ColorableGraphNode, C
                     // put it back
                     stack.push(greyNode);
                     toGrey(adjacent);
-                    return "";
+                    return hasFinished();
                 }
             }
             toBlack(greyNode);
         }
-        return "";
+        return hasFinished();
     }
-    
+    private String hasFinished() {
+        for (ColorableGraphNode node : graph.getNodes()) {
+            if (!ColorableGraphNode.Color.BLACK.equals(node.getColor())) {
+                return "";
+            }
+        }
+        return null;
+    }
     private void toGrey(ColorableGraphNode node) {
         setColor(node, ColorableGraphNode.Color.GRAY);
         time += 1;
