@@ -1160,14 +1160,14 @@ public class MainController implements Initializable {
             if (graphArc == null) {
                 normalizedDX = normalizedDY = 0;
             }
-            arrowLines[0].setEndX(getEndX() - normalizedDX * 20);
-            arrowLines[0].setEndY(getEndY() - normalizedDY * 20);
-            arrowLines[0].setStartX(x1 - normalizedDX * 20);
-            arrowLines[0].setStartY(y1 - normalizedDY * 20);
-            arrowLines[1].setEndX(getEndX() - normalizedDX * 20);
-            arrowLines[1].setEndY(getEndY() - normalizedDY * 20);
-            arrowLines[1].setStartX(x2 - normalizedDX * 20);
-            arrowLines[1].setStartY(y2 - normalizedDY * 20);
+            arrowLines[0].setEndX(getEndX() - normalizedDX * 25);
+            arrowLines[0].setEndY(getEndY() - normalizedDY * 25);
+            arrowLines[0].setStartX(x1 - normalizedDX * 25);
+            arrowLines[0].setStartY(y1 - normalizedDY * 25);
+            arrowLines[1].setEndX(getEndX() - normalizedDX * 25);
+            arrowLines[1].setEndY(getEndY() - normalizedDY * 25);
+            arrowLines[1].setStartX(x2 - normalizedDX * 25);
+            arrowLines[1].setStartY(y2 - normalizedDY * 25);
         }
 
         public Text getLabel() {

@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package hu.elte.graphalgorithms.algorithms.implementations;
+package hu.elte.graphalgorithms.core.test;
 
+import hu.elte.graphalgorithms.algorithms.implementations.DepthFirstAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
 import hu.elte.graphalgorithms.core.DirectedGraph;

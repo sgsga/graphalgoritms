@@ -26,6 +26,7 @@
             <class name="hu.elte.graphalgorithms.core.test.GraphTest" />
             <class name="hu.elte.graphalgorithms.core.test.BreadthFirstAlgorithmNGTest" />
             <class name="hu.elte.graphalgorithms.core.test.KruskalNGTest" />
+            <class name="hu.elte.graphalgorithms.core.test.DepthFirstAlgorithmNGTest" />
         </classes>
     </test>
 
