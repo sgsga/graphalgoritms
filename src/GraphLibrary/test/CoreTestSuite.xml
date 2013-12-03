@@ -24,7 +24,7 @@
         </packages>
         <classes>
             <class name="hu.elte.graphalgorithms.core.test.GraphTest" />
-            <class name="hu.elte.graphalgorithms.algorithms.implementations.BreadthFirstAlgorithmNGTest" />
+            <class name="hu.elte.graphalgorithms.core.test.BreadthFirstAlgorithmNGTest" />
             <class name="hu.elte.graphalgorithms.core.test.KruskalNGTest" />
         </classes>
     </test>
