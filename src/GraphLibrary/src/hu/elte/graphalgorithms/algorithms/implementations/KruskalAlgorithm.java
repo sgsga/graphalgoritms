@@ -34,6 +34,9 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
     @Override
     public void initialize(Graph<ColorableGraphNode, ColorableGraphArc> g) {
         graph = g;
+        for (ColorableGraphNode node : graph.getNodes()) {
+            node.setColor(ColorableGraphNode.Color.WHITE);
+        }
     }
 
     @Override
@@ -57,6 +60,7 @@ public class KruskalAlgorithm implements GraphAlgorithm<ColorableGraphNode, Colo
         if (graph.getNodeCount() > 0) {
             for (ColorableGraphNode node : graph.getNodes()) {
                 node.removeData("Set", OWNER);
+                node.setColor(ColorableGraphNode.Color.WHITE);
             }
             for (ColorableGraphNode node : graph.getNodes()) {
                 try {

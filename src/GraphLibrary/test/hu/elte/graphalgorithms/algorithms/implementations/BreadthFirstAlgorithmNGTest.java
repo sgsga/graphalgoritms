@@ -6,6 +6,7 @@
 
 package hu.elte.graphalgorithms.algorithms.implementations;
 
+import hu.elte.graphalgorithms.algorithms.implementations.BreadthFirstAlgorithm;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphArc;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
 import hu.elte.graphalgorithms.algorithms.util.ColorableGraphNode;
